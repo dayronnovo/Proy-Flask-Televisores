@@ -10,6 +10,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import uuid
+from typing import Dict
 
 
 # Creando controlador
@@ -25,11 +26,11 @@ CARPETA = os.path.abspath("./code/uploads/")
 
 # Metodos
 @multimedia_controller.route("/<int:id>")
-def get_by_id(id):
+def get_by_id(id: int):
     try:
-        autor = MultimediaService.get_by_id(id)
-        if autor:
-            return multimedia_schema.dump(autor)  # Aqui estoy usando Marshmallow
+        multimedia: Multimedia = MultimediaService.get_by_id(id)
+        if multimedia:
+            return multimedia_schema.dump(multimedia)  # Aqui estoy usando Marshmallow
         else:
             return {'Error': messages['not_found'].format(id)}, 404  # Not Found
     except Exception as error:
@@ -43,12 +44,12 @@ def create():
         # Importante Valido el entity y el archivo por separado
         mult_dict = {'nombre': request.form.get('nombre'), 'time_to_start': request.form.get(
             'time_to_start'), 'cliente_id': request.form.get('cliente_id')}
-        data = multimedia_schema.load(mult_dict)
+        data: Dict = multimedia_schema.load(mult_dict)
         archivo: FileStorage = archivo_schema.load(request.files)['archivo']
 
-        extension = os.path.splitext(archivo.filename)[1]
+        extension: str = os.path.splitext(archivo.filename)[1]
 
-        nombre_archivo = secure_filename(f"{uuid.uuid4().hex}{extension}")
+        nombre_archivo: str = secure_filename(f"{uuid.uuid4().hex}{extension}")
         archivo.save(os.path.join(CARPETA, nombre_archivo))
 
         data['archivo'] = nombre_archivo

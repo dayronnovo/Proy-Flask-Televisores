@@ -3,6 +3,7 @@ from services.cliente_service import ClienteService
 from marshmallow import ValidationError
 from schemas.cliente_schemas import ClienteSchema
 from messages.es_ES import messages
+from typing import Dict
 
 # Creando controlador
 cliente_controller = Blueprint('cliente_controller', __name__)
@@ -13,11 +14,11 @@ cliente_without_multimedias = ClienteSchema(exclude=("multimedias",))
 
 # Metodos
 @cliente_controller.route("/<int:id>")
-def get_by_id(id):
+def get_by_id(id: int):
     try:
-        autor = ClienteService.get_by_id(id)
-        if autor:
-            return cliente_schema.dump(autor)  # Aqui estoy usando Marshmallow
+        cliente = ClienteService.get_by_id(id)
+        if cliente:
+            return cliente_schema.dump(cliente)  # Aqui estoy usando Marshmallow
         else:
             return {'Error': messages['not_found'].format(id)}, 404  # Not Found
     except Exception as error:
@@ -28,7 +29,7 @@ def get_by_id(id):
 def create():
     try:
         # Ya aqui estoy validando con Marshmallow
-        data = cliente_schema.load(request.get_json())
+        data: Dict = cliente_schema.load(request.get_json())
         ClienteService.create(data)
 
         return {"Message": messages['entity_created'].format("Cliente")}, 201  # Created
