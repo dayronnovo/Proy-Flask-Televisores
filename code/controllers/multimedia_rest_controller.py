@@ -1,6 +1,5 @@
-from flask import Blueprint, request, send_from_directory
-from models.multimedia import Multimedia
-from services.multimedia_service import MultimediaService, NotFound
+from flask import Blueprint, request, send_from_directory, jsonify
+from services.multimedia_service import MultimediaService, NotFound, Multimedia
 from marshmallow import ValidationError
 from schemas.multimedia_schema import MultimediaSchema
 from schemas.archivos_schema import ArchivoSchema
@@ -74,5 +73,17 @@ def get_file(id: int):
             return {'Error': messages['not_found'].format(id)}, 404  # Not Found
     except FileNotFoundError as error:
         return {'Error': "La imagen no existe."}, 404  # Not Found
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+
+
+@multimedia_controller.route("/page/<int:page>")
+def get_all_pagination(page=1):
+    try:
+        result = MultimediaService.get_all_pagination(page)
+        # multimedia = multimedia_schema.dump(result, many=True)
+        multimedia = multimedia_without_cliente.dump(result, many=True)
+        return jsonify(multimedia)
+
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error

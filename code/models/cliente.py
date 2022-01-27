@@ -19,4 +19,4 @@ class Cliente(db.Model):
         return cls(data.get('id'), data['nombre'])
 
     def __repr__(self) -> str:
-        return f"Autor => [id: {self.id}, nombre: {self.nombre}]"
+        return f"Cliente => [id: {self.id}, nombre: {self.nombre}]"

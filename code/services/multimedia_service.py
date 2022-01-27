@@ -7,6 +7,7 @@ from typing import Dict
 
 
 class MultimediaService:
+    NUMBER_OF_ENTITIES = 10
 
     @staticmethod
     def get_by_id(id: int):
@@ -29,3 +30,11 @@ class MultimediaService:
     def get_all():
         autores = Multimedia.query.all()
         return autores
+
+    @staticmethod
+    def get_all_pagination(page):
+
+        pagination = Multimedia.query.order_by(Multimedia.id.desc()).paginate(
+            page, per_page=MultimediaService.NUMBER_OF_ENTITIES, error_out=False)
+
+        return pagination.items

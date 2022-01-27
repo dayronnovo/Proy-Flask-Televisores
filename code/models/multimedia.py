@@ -24,4 +24,4 @@ class Multimedia(db.Model):
         return cls(data.get('id'), data['nombre'], data['time_to_start'], data.get('archivo'))
 
     def __repr__(self) -> str:
-        return f"Autor => [id: {self.id}, nombre: {self.nombre}, time_to_start: {self.time_to_start}, archivo: {self.archivo}]"
+        return f"Multimedia => [id: {self.id}, nombre: {self.nombre}, time_to_start: {self.time_to_start}, archivo: {self.archivo}]"
