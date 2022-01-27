@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, send_from_directory
+from models.multimedia import Multimedia
 from services.multimedia_service import MultimediaService, NotFound
 from marshmallow import ValidationError
 from schemas.multimedia_schema import MultimediaSchema
@@ -38,7 +39,8 @@ def get_by_id(id):
 @multimedia_controller.route("/", methods=['POST'], strict_slashes=False)
 def create():
     try:
-
+        # Obtengo los parametros por Form-Data y creo un dict para poder validar la entrada.
+        # Importante Valido el entity y el archivo por separado
         mult_dict = {'nombre': request.form.get('nombre'), 'time_to_start': request.form.get(
             'time_to_start'), 'cliente_id': request.form.get('cliente_id')}
         data = multimedia_schema.load(mult_dict)
@@ -57,5 +59,19 @@ def create():
         return {'Error': f"{error}"}, 404  # Not Found
     except (RequestEntityTooLarge, ValidationError) as error:
         return {'Error': f"{error}"}, 400  # Bad Request
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+
+
+@multimedia_controller.route("/file/<int:id>")
+def get_file(id: int):
+    try:
+        multimedia: Multimedia = MultimediaService.get_by_id(id)
+        if multimedia:
+            return send_from_directory("uploads", multimedia.archivo, as_attachment=True)
+        else:
+            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+    except FileNotFoundError as error:
+        return {'Error': "La imagen no existe."}, 404  # Not Found
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
