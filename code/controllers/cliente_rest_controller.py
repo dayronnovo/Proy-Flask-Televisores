@@ -4,6 +4,7 @@ from marshmallow import ValidationError
 from schemas.cliente_schemas import ClienteSchema
 from messages.es_ES import messages
 from typing import Dict
+from math import ceil
 
 # Creando controlador
 cliente_controller = Blueprint('cliente_controller', __name__)
@@ -44,10 +45,13 @@ def get_all_pagination(page=1):
     try:
 
         result = ClienteService.get_all_pagination(page)
-
         # autores = cliente_schema.dump(result, many=True)
-        autores = cliente_without_multimedias.dump(result, many=True)
-        return jsonify(autores)
+        autores = cliente_without_multimedias.dump(result.items, many=True)
+        # Formando el JSON
+        json_temp = {'content': autores,  'pageable': {
+            'number': result.page - 1, 'totalPages': ceil(result.total/result.per_page)}}
+
+        return json_temp
 
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error

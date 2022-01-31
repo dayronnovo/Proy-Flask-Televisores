@@ -10,6 +10,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import uuid
 from typing import Dict
+from math import ceil
+from controllers.cliente_rest_controller import cliente_without_multimedias
 
 
 # Creando controlador
@@ -77,13 +79,29 @@ def get_file(id: int):
         return {'Error': f"{error}"}, 500  # Internal Error
 
 
-@multimedia_controller.route("/page/<int:page>")
-def get_all_pagination(page=1):
+@multimedia_controller.route("/cliente/<int:id>/<int:page>")
+def get_multimedias_by_cliente_id(id: int, page: int):
     try:
-        result = MultimediaService.get_all_pagination(page)
-        # multimedia = multimedia_schema.dump(result, many=True)
-        multimedia = multimedia_without_cliente.dump(result, many=True)
-        return jsonify(multimedia)
+        result = MultimediaService.get_multimedias_by_cliente_id(id, page)
+        multimedias = multimedia_without_cliente.dump(result.items, many=True)
+
+        cliente = cliente_without_multimedias.dump(result.items[0].cliente)
+
+        json_temp = {'content': {'cliente': cliente, 'multimedias': multimedias},  'pageable': {
+            'number': result.page - 1, 'totalPages': ceil(result.total/result.per_page)}}
+
+        return json_temp
 
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
+
+# @multimedia_controller.route("/page/<int:page>")
+# def get_all_pagination(page=1):
+#     try:
+#         result = MultimediaService.get_all_pagination(page)
+#         # multimedia = multimedia_schema.dump(result, many=True)
+#         multimedia = multimedia_without_cliente.dump(result, many=True)
+#         return jsonify(multimedia)
+
+#     except Exception as error:
+#         return {'Error': f"{error}"}, 500  # Internal Error

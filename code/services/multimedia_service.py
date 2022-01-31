@@ -4,10 +4,11 @@ from conexion_bd_mysql import db
 from excepciones_personalizadas.excepciones import NotFound
 from messages.es_ES import messages
 from typing import Dict
+from flask_sqlalchemy import Pagination
 
 
 class MultimediaService:
-    NUMBER_OF_ENTITIES = 10
+    NUMBER_OF_ENTITIES = 1
 
     @staticmethod
     def get_by_id(id: int):
@@ -28,13 +29,20 @@ class MultimediaService:
 
     @staticmethod
     def get_all():
-        autores = Multimedia.query.all()
-        return autores
+        multimedias = Multimedia.query.all()
+        return multimedias
 
     @staticmethod
-    def get_all_pagination(page):
+    def get_multimedias_by_cliente_id(id: int, page: int):
 
-        pagination = Multimedia.query.order_by(Multimedia.id.desc()).paginate(
+        multimedias: Pagination = Multimedia.query.filter_by(cliente_id=id).paginate(
             page, per_page=MultimediaService.NUMBER_OF_ENTITIES, error_out=False)
+        return multimedias
 
-        return pagination.items
+    # @staticmethod
+    # def get_all_pagination(page):
+
+    #     pagination = Multimedia.query.order_by(Multimedia.id.desc()).paginate(
+    #         page, per_page=MultimediaService.NUMBER_OF_ENTITIES, error_out=False)
+
+    #     return pagination.items
