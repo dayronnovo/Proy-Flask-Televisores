@@ -2,11 +2,11 @@ from marshmallow import Schema, fields, validate, ValidationError, validates
 
 
 class ClienteSchema(Schema):
-    id = fields.Int()
+    id = fields.Int(required=True)
     nombre = fields.Str(required=True, validate=validate.Length(min=2))
 
     # Relacion
-    multimedias = fields.List(fields.Nested("MultimediaSchema", exclude=("cliente",)))
+    televisores = fields.List(fields.Nested("TelevisorSchema"), exclude=("cliente",))
 
     @validates('nombre')
     def string_vacio(self, cadena: str):

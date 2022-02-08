@@ -11,7 +11,6 @@ DATA = tuple('.csv .ini .json .plist .xml .yaml .yml'.split())
 SCRIPTS = tuple('.js .php .pl .py .rb .sh'.split())
 ARCHIVES = tuple('.gz .bz2 .zip .tar .tgz .txz .7z'.split())
 EXECUTABLES = tuple('.so .exe .dll'.split())
-DEFAULTS = TEXT + DOCUMENTS + IMAGES + DATA
 
 
 class FileStorageField(fields.Field):

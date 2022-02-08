@@ -1,6 +1,6 @@
 from models.cliente import Cliente
 from conexion_bd_mysql import db
-from typing import Dict
+from typing import Dict, Union
 from flask_sqlalchemy import Pagination
 
 
@@ -13,15 +13,14 @@ class ClienteService:
         return cliente
 
     @staticmethod
-    def create(data: Dict):
-        cliente = Cliente.constructor(data)
-        db.session.add(cliente)
+    def save(data: Dict):
+        data = Cliente.constructor(data)
+        db.session.add(data)
         db.session.commit()
 
     @staticmethod
-    def get_all():
-        clientes = Cliente.query.all()
-        return clientes
+    def update(data: Cliente):
+        db.session.commit()
 
     @staticmethod
     def get_all_pagination(page):

@@ -1,27 +1,23 @@
 from conexion_bd_mysql import db
 from typing import Dict
+from models.televisor import association_table
 
 
 class Multimedia(db.Model):
     __tablename__ = 'multimedias'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre = db.Column(db.String(80), nullable=False)
-    archivo = db.Column(db.String(80))
-    time_to_start = db.Column(db.DateTime, nullable=False)
+    archivo = db.Column(db.String(80), nullable=False)
 
     # relacion
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
-    cliente = db.relationship('Cliente', back_populates="multimedias")
+    televisores = db.relationship("Televisor", secondary=association_table, back_populates="multimedias")
 
-    def __init__(self, id, nombre, time_to_start, archivo) -> None:
+    def __init__(self, id,  archivo) -> None:
         self.id = id
-        self.nombre = nombre
-        self.time_to_start = time_to_start
         self.archivo = archivo
 
     @classmethod
     def constructor(cls, data: Dict):
-        return cls(data.get('id'), data['nombre'], data['time_to_start'], data.get('archivo'))
+        return cls(data.get('id'), data['archivo'])
 
     def __repr__(self) -> str:
-        return f"Multimedia => [id: {self.id}, nombre: {self.nombre}, time_to_start: {self.time_to_start}, archivo: {self.archivo}]"
+        return f"Multimedia => [id: {self.id}, archivo: {self.archivo}]"

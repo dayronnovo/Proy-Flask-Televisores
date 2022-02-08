@@ -5,7 +5,7 @@ from configs import default_config
 # Importar los controladores
 from controllers.cliente_rest_controller import cliente_controller
 from controllers.multimedia_rest_controller import multimedia_controller
-# from controllers.image_rest_controller import image_controller
+from controllers.televisor_rest_controller import televisor_controller
 
 app = Flask(__name__)
 app.config.from_object(default_config)
@@ -30,7 +30,7 @@ def after_request(response):
 # Controllers
 app.register_blueprint(cliente_controller, url_prefix='/cliente')
 app.register_blueprint(multimedia_controller, url_prefix='/multimedia')
-# app.register_blueprint(image_controller, url_prefix='/imagen')
+app.register_blueprint(televisor_controller, url_prefix='/televisor')
 
 
 if __name__ == '__main__':

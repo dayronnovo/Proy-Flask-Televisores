@@ -11,15 +11,17 @@ from werkzeug.utils import secure_filename
 import uuid
 from typing import Dict
 from math import ceil
-from controllers.cliente_rest_controller import cliente_without_multimedias
+import json
+
+# from controllers.cliente_rest_controller import cliente_without_multimedias
 
 
 # Creando controlador
 multimedia_controller = Blueprint('multimedia_controller', __name__)
 # inicializando el MultimediaSchema
 multimedia_schema = MultimediaSchema()
-multimedia_without_cliente = MultimediaSchema(exclude=("cliente",))
-
+multimedia_without_televisores = MultimediaSchema(exclude=("televisores",))
+# inicializando el ArchivoSchema
 archivo_schema = ArchivoSchema()
 
 CARPETA = os.path.abspath("./code/uploads/")
@@ -41,21 +43,23 @@ def get_by_id(id: int):
 @multimedia_controller.route("/", methods=['POST'], strict_slashes=False)
 def create():
     try:
-        # Obtengo los parametros por Form-Data y creo un dict para poder validar la entrada.
-        # Importante Valido el entity y el archivo por separado
-        mult_dict = {'nombre': request.form.get('nombre'), 'time_to_start': request.form.get(
-            'time_to_start'), 'cliente_id': request.form.get('cliente_id')}
-        data: Dict = multimedia_schema.load(mult_dict)
-        archivo: FileStorage = archivo_schema.load(request.files)['archivo']
+        #  De esta Forma probe como recibir files lo dejo como comentario
+        # prueba: FileStorage = request.files['televisor']
+        # televisor_json = json.load(request.files['televisor'])
+        # print(televisor_json)
+        # print(request.files['archivo'])
+
+        # Tengo que crearlo asi porque Marchmallow siempre recibe un JSON si envio solo el
+        request_temp = {'archivo': request.files['archivo']}
+        # validar el archivo con Marshmallow y luego obtengo el FileStoraged del dict
+        archivo = archivo_schema.load(request_temp)['archivo']
 
         extension: str = os.path.splitext(archivo.filename)[1]
 
         nombre_archivo: str = secure_filename(f"{uuid.uuid4().hex}{extension}")
-        archivo.save(os.path.join(CARPETA, nombre_archivo))
+        # archivo.save(os.path.join(CARPETA, nombre_archivo))
 
-        data['archivo'] = nombre_archivo
-
-        MultimediaService.create(data)
+        MultimediaService.create({'archivo': nombre_archivo}, json.load(request.files['televisor']))
         return {"Message": messages['entity_created'].format("Multimedia")}, 201  # Created
     except NotFound as error:
         return {'Error': f"{error}"}, 404  # Not Found
@@ -79,21 +83,21 @@ def get_file(id: int):
         return {'Error': f"{error}"}, 500  # Internal Error
 
 
-@multimedia_controller.route("/cliente/<int:id>/<int:page>")
-def get_multimedias_by_cliente_id(id: int, page: int):
-    try:
-        result = MultimediaService.get_multimedias_by_cliente_id(id, page)
-        multimedias = multimedia_without_cliente.dump(result.items, many=True)
+# @multimedia_controller.route("/cliente/<int:id>/<int:page>")
+# def get_multimedias_by_cliente_id(id: int, page: int):
+#     try:
+#         result = MultimediaService.get_multimedias_by_cliente_id(id, page)
+#         multimedias = multimedia_without_cliente.dump(result.items, many=True)
 
-        cliente = cliente_without_multimedias.dump(result.items[0].cliente)
+#         cliente = cliente_without_multimedias.dump(result.items[0].cliente)
 
-        json_temp = {'content': {'cliente': cliente, 'multimedias': multimedias},  'pageable': {
-            'number': result.page - 1, 'totalPages': ceil(result.total/result.per_page)}}
+#         json_temp = {'content': {'cliente': cliente, 'multimedias': multimedias},  'pageable': {
+#             'number': result.page - 1, 'totalPages': ceil(result.total/result.per_page)}}
 
-        return json_temp
+#         return json_temp
 
-    except Exception as error:
-        return {'Error': f"{error}"}, 500  # Internal Error
+#     except Exception as error:
+#         return {'Error': f"{error}"}, 500  # Internal Error
 
 # @multimedia_controller.route("/page/<int:page>")
 # def get_all_pagination(page=1):
