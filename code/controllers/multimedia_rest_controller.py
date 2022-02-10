@@ -57,7 +57,7 @@ def create():
         extension: str = os.path.splitext(archivo.filename)[1]
 
         nombre_archivo: str = secure_filename(f"{uuid.uuid4().hex}{extension}")
-        # archivo.save(os.path.join(CARPETA, nombre_archivo))
+        archivo.save(os.path.join(CARPETA, nombre_archivo))
 
         MultimediaService.create({'archivo': nombre_archivo}, json.load(request.files['televisor']))
         return {"Message": messages['entity_created'].format("Multimedia")}, 201  # Created
@@ -82,6 +82,20 @@ def get_file(id: int):
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
+
+@multimedia_controller.route("/cliente/<int:id>")
+def get_multimedias_by_cliente_id(id: int):
+    try:
+        multimedias = MultimediaService.getMultimediasByClienteId(id)
+
+        if multimedias:
+            multimedias_dict = multimedia_without_televisores.dump(
+                multimedias, many=True)  # Aqui estoy usando Marshmallow
+            return jsonify(multimedias_dict)
+        else:
+            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
 
 # @multimedia_controller.route("/cliente/<int:id>/<int:page>")
 # def get_multimedias_by_cliente_id(id: int, page: int):

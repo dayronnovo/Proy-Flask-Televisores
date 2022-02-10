@@ -25,6 +25,18 @@ class TelevisorService:
         db.session.commit()
 
     @staticmethod
+    def create(data: Dict):
+        televisor = Televisor.constructor(data)
+        db.session.add(televisor)
+        db.session.commit()
+
+    @staticmethod
+    def save(televisor: Televisor):
+
+        db.session.add(televisor)
+        db.session.commit()
+
+    @staticmethod
     def get_all_pagination(page):
 
         pagination: Pagination = Televisor.query.order_by(Televisor.id).paginate(
@@ -38,6 +50,7 @@ class TelevisorService:
             page, per_page=TelevisorService.NUMBER_OF_ENTITIES, error_out=False)
         return televisores
 
+    @staticmethod
     def get_televisores_by_cliente_id(id):
         televisores = Televisor.query.filter_by(cliente_id=id).all()
         return televisores

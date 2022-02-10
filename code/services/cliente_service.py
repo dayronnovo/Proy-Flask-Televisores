@@ -5,7 +5,7 @@ from flask_sqlalchemy import Pagination
 
 
 class ClienteService:
-    NUMBER_OF_ENTITIES = 1
+    NUMBER_OF_ENTITIES = 2
 
     @staticmethod
     def get_by_id(id: int):

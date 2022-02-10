@@ -65,9 +65,9 @@ def get_all_pagination(page=1):
 
         result = ClienteService.get_all_pagination(page)
         # autores = cliente_schema.dump(result, many=True)
-        autores = cliente_without_televisores.dump(result.items, many=True)
+        cliente = cliente_without_televisores.dump(result.items, many=True)
         # Formando el JSON
-        json_temp = {'content': autores,  'pageable': {
+        json_temp = {'content': cliente,  'pageable': {
             'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}
         #  ceil(result.total/result.per_page)
         return json_temp
