@@ -29,3 +29,7 @@ class Televisor(db.Model):
 
     def __repr__(self) -> str:
         return f"Televisor => [id: {self.id}, ubicacion: {self.ubicacion}]"
+
+    def __eq__(self, otro_mult):
+        # Aquí puedes comparar cualquier cosa de los dos objetos. Debes regresar un Booleano
+        return otro_mult.id == self.id

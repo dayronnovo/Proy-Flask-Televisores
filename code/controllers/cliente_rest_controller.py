@@ -1,16 +1,12 @@
 from flask import Blueprint, request
 from services.cliente_service import ClienteService, Cliente
 from marshmallow import ValidationError
-from schemas.cliente_schemas import ClienteSchema
 from messages.es_ES import messages
 from typing import Dict
-from math import ceil
+from schemas.general_schemas import cliente_schema, cliente_without_televisores
 
 # Creando controlador
 cliente_controller = Blueprint('cliente_controller', __name__)
-# inicializando el ClienteSchema
-cliente_schema = ClienteSchema()
-cliente_without_televisores = ClienteSchema(exclude=("televisores",))
 
 
 # Metodos
@@ -19,7 +15,7 @@ def get_by_id(id: int):
     try:
         cliente: Cliente = ClienteService.get_by_id(id)
         if cliente:
-            return cliente_schema.dump(cliente)  # Aqui estoy usando Marshmallow
+            return cliente_without_televisores.dump(cliente)  # Aqui estoy usando Marshmallow
         else:
             return {'Error': messages['not_found'].format(id)}, 404  # Not Found
     except Exception as error:

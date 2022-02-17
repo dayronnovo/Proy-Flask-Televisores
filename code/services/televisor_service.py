@@ -1,9 +1,11 @@
 from conexion_bd_mysql import db
 from models.televisor import Televisor
 from models.cliente import Cliente
+from models.multimedia import Multimedia
 from typing import Dict
 from flask_sqlalchemy import Pagination
 from excepciones_personalizadas.excepciones import NotFound
+from sqlalchemy import select
 
 
 class TelevisorService:
@@ -31,8 +33,12 @@ class TelevisorService:
         db.session.commit()
 
     @staticmethod
-    def save(televisor: Televisor):
+    def get_televisores_by_cliente_id(id):
+        televisores = Televisor.query.filter_by(cliente_id=id).all()
+        return televisores
 
+    @staticmethod
+    def save(televisor: Televisor):
         db.session.add(televisor)
         db.session.commit()
 
@@ -51,6 +57,12 @@ class TelevisorService:
         return televisores
 
     @staticmethod
-    def get_televisores_by_cliente_id(id):
-        televisores = Televisor.query.filter_by(cliente_id=id).all()
-        return televisores
+    def getMultimediasByClienteId(id):
+        stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(Cliente.id == id)
+        results = db.session.execute(stmt).unique().all()
+        # Lo que devuelve
+        # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
+
+        results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+        return results

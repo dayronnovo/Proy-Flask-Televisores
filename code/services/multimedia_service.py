@@ -23,12 +23,16 @@ class MultimediaService:
         return multimedia
 
     @staticmethod
+    def get_by_ids(ids: List):
+        multimedias = Multimedia.query.filter(Multimedia.id.in_(ids)).all()
+        return multimedias if len(multimedias) > 0 else None
+
+    @staticmethod
     def create(data: Dict, idsClientes: Dict):
         # print(data)
         # print(idsClientes)
 
         multimedia = Multimedia.constructor(data)
-        Televisor.query.filter_by(cliente_id=id).all()
         televisores = Televisor.query.filter(Televisor.id.in_(idsClientes['ids'])).all()
 
         multimedia.televisores = televisores
@@ -51,6 +55,9 @@ class MultimediaService:
         db.session.execute(sql1)
         db.session.commit()
 
+
+# Obtengo todas las multimedias del cliente. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
+
     @staticmethod
     def getMultimediasByClienteId(id):
         stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(Cliente.id == id)
@@ -62,7 +69,64 @@ class MultimediaService:
 
         return results
 
-    # @staticmethod
+
+# Obtengo todas las multimedias del televisor. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
+
+    @staticmethod
+    def getMultimediasByTelevisorId(id):
+        stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
+            Televisor.id == id)
+        results = db.session.execute(stmt).all()
+        if len(results) > 0:
+            multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+            televisor = results[0][1]
+            cliente = results[0][2]
+            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            return mapa
+        else:
+            return None
+
+
+# Obtengo todas las imagenes del televisor. Lo uso en el ImagenesComponent para poder marcar en el checked. Es necesareo separarlos para obligar a que se deban escoger imagenes o videos. Nunca los dos juntos.
+
+
+    @staticmethod
+    def getImagenesByTelevisorId(id):
+        stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
+            Televisor.id == id).where(Multimedia.tipo_archivo.contains('image'))
+        results = db.session.execute(stmt).all()
+        if len(results) > 0:
+            multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+            televisor = results[0][1]
+            cliente = results[0][2]
+            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            return mapa
+        else:
+            return None
+
+
+# Obtengo todos los videos del televisor. Lo uso en el ImagenesComponent para poder marcar en el checked. Es necesareo separarlos para obligar a que se deban escoger imagenes o videos. Nunca los dos juntos.
+
+
+    @staticmethod
+    def getVideosByTelevisorId(id):
+        stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
+            Televisor.id == id).where(Multimedia.tipo_archivo.contains('video'))
+        results = db.session.execute(stmt).all()
+        if len(results) > 0:
+            multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+            televisor = results[0][1]
+            cliente = results[0][2]
+            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            return mapa
+        else:
+            return None
+
+# =========================================================
+#                 Eliminar varios entities
+# =========================================================
+
+# @staticmethod
     # def delete(ids: List):
     #     sql1 = delete(Multimedia).where(Multimedia.id.in_(ids))
     #     db.session.execute(sql1)
@@ -76,3 +140,36 @@ class MultimediaService:
 
         #     print(multimedias)
         #     return multimedias
+
+
+# =========================================================
+#             Los dejo como muestra del join
+# =========================================================
+
+    # @staticmethod
+    # def getImagenesByTelevisorId(id):
+    #     stmt = (select(Multimedia, Televisor)).join(Televisor.multimedias).join(Televisor.cliente).where(
+    #         Televisor.id == id).where(Multimedia.tipo_archivo.contains('image'))
+    #     results = db.session.execute(stmt).all()
+    #     if len(results) > 0:
+    #         multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+    #         televisor = results[0][1]
+    #         cliente = results[0][2]
+    #         mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+    #         return mapa
+    #     else:
+    #         return None
+
+    # @staticmethod
+    # def getVideosByTelevisorId(id):
+    #     stmt = (select(Multimedia, Televisor)).join(Televisor.multimedias).join(Televisor.cliente).where(
+    #         Televisor.id == id).where(Multimedia.tipo_archivo.contains('video'))
+    #     results = db.session.execute(stmt).all()
+    #     if len(results) > 0:
+    #         multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+    #         televisor = results[0][1]
+    #         cliente = results[0][2]
+    #         mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+    #         return mapa
+    #     else:
+    #         return None

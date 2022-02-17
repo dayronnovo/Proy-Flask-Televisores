@@ -1,10 +1,10 @@
-from marshmallow import Schema, fields, validates, ValidationError, validate
-from schemas.archivos_schema import FileStorageField
+from marshmallow import Schema, fields
 
 
 class MultimediaSchema(Schema):
     id = fields.Int()
     archivo = fields.String()
+    tipo_archivo = fields.String()
 
     # Relacion
     televisores = fields.List(fields.Nested("TelevisorSchema", exclude=("multimedias",)))
