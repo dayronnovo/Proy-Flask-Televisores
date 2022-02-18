@@ -23,9 +23,18 @@ class MultimediaService:
         return multimedia
 
     @staticmethod
-    def get_by_ids(ids: List):
-        multimedias = Multimedia.query.filter(Multimedia.id.in_(ids)).all()
-        return multimedias if len(multimedias) > 0 else None
+    def get_by_ids(ids: List, televisor_id: int):
+
+        stmt = (select(Multimedia)).join(Televisor.multimedias).where(
+            Televisor.id == televisor_id).where(Multimedia.id.in_(ids))
+        results = db.session.execute(stmt).unique().all()
+
+        if len(results) > 0:
+            results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+            return results
+        else:
+            return None
 
     @staticmethod
     def create(data: Dict, idsClientes: Dict):
@@ -58,6 +67,7 @@ class MultimediaService:
 
 # Obtengo todas las multimedias del cliente. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
 
+
     @staticmethod
     def getMultimediasByClienteId(id):
         stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(Cliente.id == id)
@@ -71,6 +81,7 @@ class MultimediaService:
 
 
 # Obtengo todas las multimedias del televisor. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
+
 
     @staticmethod
     def getMultimediasByTelevisorId(id):
@@ -89,7 +100,6 @@ class MultimediaService:
 
 # Obtengo todas las imagenes del televisor. Lo uso en el ImagenesComponent para poder marcar en el checked. Es necesareo separarlos para obligar a que se deban escoger imagenes o videos. Nunca los dos juntos.
 
-
     @staticmethod
     def getImagenesByTelevisorId(id):
         stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
@@ -106,7 +116,6 @@ class MultimediaService:
 
 
 # Obtengo todos los videos del televisor. Lo uso en el ImagenesComponent para poder marcar en el checked. Es necesareo separarlos para obligar a que se deban escoger imagenes o videos. Nunca los dos juntos.
-
 
     @staticmethod
     def getVideosByTelevisorId(id):

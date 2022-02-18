@@ -54,19 +54,17 @@ def create():
         return {'Error': f"{error}"}, 500  # Internal Error
 
 
-@multimedia_controller.route("/reproducir")
-def get_multimedias_by_ids():
+@multimedia_controller.route("/reproducir/<int:id>", methods=['PUT'], strict_slashes=False)
+def get_multimedias_by_ids(id):
 
     # print(request.get_json()['ids'])
 
     try:
 
-        multimedias = MultimediaService.get_by_ids(request.get_json()['ids'])
+        multimedias = MultimediaService.get_by_ids(request.get_json()['ids'], id)
         if multimedias:
-
-            print(multimedias)
-
-            return {"Message": "Ok"}
+            multimedias = multimedia_without_televisores.dump(multimedias, many=True)
+            return jsonify(multimedias)
         else:
             return {'Error': "No se encontraron multimedias"}, 404  # Not Found
     except NotFound as error:
