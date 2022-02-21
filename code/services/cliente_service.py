@@ -1,4 +1,5 @@
 from models.cliente import Cliente
+from models.multimedia import Multimedia
 from conexion_bd_mysql import db
 from typing import Dict, Union
 from flask_sqlalchemy import Pagination
@@ -31,3 +32,13 @@ class ClienteService:
 
         # return pagination.items  # items es una lista de objs del entity
         return pagination
+
+    @staticmethod
+    def agregar_multimedias_a_un_cliente(data_dict: Dict, cliente_id):
+        cliente: Cliente = ClienteService.get_by_id(cliente_id)
+        multimedia: Multimedia = Multimedia.constructor(data_dict)
+
+        cliente.multimedias.append(multimedia)
+
+        db.session.add(cliente)
+        db.session.commit()

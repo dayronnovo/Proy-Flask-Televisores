@@ -2,7 +2,7 @@ from conexion_bd_mysql import db
 from models.televisor import Televisor
 from models.cliente import Cliente
 from models.multimedia import Multimedia
-from typing import Dict
+from typing import Dict, List
 from flask_sqlalchemy import Pagination
 from excepciones_personalizadas.excepciones import NotFound
 from sqlalchemy import select
@@ -64,5 +64,15 @@ class TelevisorService:
         # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
 
         results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+        return results
+
+    @staticmethod
+    def get_by_ids(ids: List):
+
+        stmt = (select(Televisor)).where(Televisor.id.in_(ids))
+        results = db.session.execute(stmt).all()
+
+        results = [televisor_tupla[0] for televisor_tupla in results]
 
         return results

@@ -7,8 +7,10 @@ class Cliente(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(80), nullable=False)
 
-    # Relacion
+    # Relacion con Televisor
     televisores = db.relationship('Televisor', back_populates='cliente', lazy=True)
+    # Relacion con Multimedia
+    multimedias = db.relationship('Multimedia', back_populates='cliente', lazy=True)
 
     def __init__(self, id, nombre) -> None:
         self.id = id

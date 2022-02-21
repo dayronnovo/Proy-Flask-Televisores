@@ -6,7 +6,8 @@ class ClienteSchema(Schema):
     nombre = fields.Str(required=True, validate=validate.Length(min=2))
 
     # Relacion
-    televisores = fields.List(fields.Nested("TelevisorSchema"), exclude=("cliente",))
+    televisores = fields.List(fields.Nested("TelevisorSchema",), only=('id', 'ubicacion'))
+    multimedias = fields.List(fields.Nested("MultimediaSchema",), only=('id', 'archivo', 'tipo_archivo'))
 
     @validates('nombre')
     def string_vacio(self, cadena: str):

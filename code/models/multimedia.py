@@ -9,8 +9,12 @@ class Multimedia(db.Model):
     archivo = db.Column(db.String(80), nullable=False)
     tipo_archivo = db.Column(db.String(80), nullable=False)
 
-    # relacion
+    # relacion con Televisor
     televisores = db.relationship("Televisor", secondary=association_table, back_populates="multimedias")
+
+    # relacion con cliente
+    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    cliente = db.relationship('Cliente', back_populates="multimedias")
 
     def __init__(self, id,  archivo, tipo_archivo) -> None:
         self.id = id

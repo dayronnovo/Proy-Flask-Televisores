@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import uuid
 import json
-from schemas.general_schemas import multimedia_schema, multimedia_without_televisores, archivo_schema, cliente_without_televisores, televisor_without_multimedias_and_cliente
+from schemas.general_schemas import multimedia_schema, multimedia_without_televisores_and_cliente, multimedia_without_televisores, archivo_schema, cliente_without_televisores, televisor_without_multimedias_and_cliente
 
 
 # Creando controlador
@@ -17,41 +17,6 @@ multimedia_controller = Blueprint('multimedia_controller', __name__)
 
 
 CARPETA = os.path.abspath("./code/uploads/")
-
-
-# Creo las multimedias
-@multimedia_controller.route("/", methods=['POST'], strict_slashes=False)
-def create():
-    try:
-        #  De esta Forma probe como recibir files lo dejo como comentario
-        # prueba: FileStorage = request.files['televisor']
-        # televisor_json = json.load(request.files['televisor'])
-        # print(televisor_json)
-        # print(request.files['archivo'])
-
-        # Tengo que crearlo asi porque Marchmallow siempre recibe un JSON
-        request_temp = {'archivo': request.files['archivo']}
-        # validar el archivo con Marshmallow y luego obtengo el FileStoraged del dict
-        archivo: FileStorage = archivo_schema.load(request_temp)['archivo']
-
-        # print(f"Imagen: {archivo.content_type.startswith('image')}")
-        # print(f"Video: {archivo.content_type.startswith('video')}")
-
-        extension: str = os.path.splitext(archivo.filename)[1]
-
-        nombre_archivo: str = secure_filename(f"{uuid.uuid4().hex}{extension}")
-        # Debo guardar la imagen o el video despues de haber guardado en la BBDD.
-        archivo.save(os.path.join(CARPETA, nombre_archivo))
-
-        MultimediaService.create({'archivo': nombre_archivo, 'tipo_archivo': archivo.content_type},
-                                 json.load(request.files['televisor']))
-        return {"Message": messages['entity_created'].format("Multimedia")}, 201  # Created
-    except NotFound as error:
-        return {'Error': f"{error}"}, 404  # Not Found
-    except (RequestEntityTooLarge, ValidationError) as error:
-        return {'Error': f"{error}"}, 400  # Bad Request
-    except Exception as error:
-        return {'Error': f"{error}"}, 500  # Internal Error
 
 
 @multimedia_controller.route("/reproducir/<int:id>", methods=['PUT'], strict_slashes=False)
@@ -77,7 +42,7 @@ def get_multimedias_by_ids(id):
 @multimedia_controller.route("/file/<int:id>")
 def get_file(id: int):
     try:
-        multimedia: Multimedia = MultimediaService.get_by_id(id)
+        multimedia: Multimedia = MultimediaService.getById(id)
         if multimedia:
             return send_from_directory("uploads", multimedia.archivo, as_attachment=True)
         else:
@@ -88,21 +53,40 @@ def get_file(id: int):
         return {'Error': f"{error}"}, 500  # Internal Error
 
 
-# Obtengo las imagenes por el id del televisor.
-@multimedia_controller.route("/televisor/imagenes/<int:id>")
-def get_imagenes_by_televisor_id(id: int):
+# Obtengo las imagenes por el id del cliente
+@multimedia_controller.route("/imagenes/<int:id>")
+def get_imagenes_by_cliente_id(id: int):
     try:
-        result_dict = MultimediaService.getImagenesByTelevisorId(id)
-        if result_dict:
-            cliente = cliente_without_televisores.dump(result_dict['cliente'])
-            televisor = televisor_without_multimedias_and_cliente.dump(result_dict['televisor'])
-            multimedias = multimedia_without_televisores.dump(result_dict['multimedias'], many=True)
+        result = MultimediaService.getImagenesByClienteId(id)
+        if result:
 
-            return {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            multimedias = multimedia_without_televisores_and_cliente.dump(result, many=True)
+
+            return jsonify(multimedias)
         else:
-            return {'Error': f"El televisor con el id: {id} no tiene multimedias"}, 404  # Not Found
+            return {'Error': f"El cliente con el id: {id} no tiene imagenes"}, 404  # Not Found
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
+
+# Obtengo las imagenes por el id del cliente
+
+
+@multimedia_controller.route("/videos/<int:id>")
+def get_videos_by_cliente_id(id: int):
+    try:
+        result = MultimediaService.getVideosByClienteId(id)
+        if result:
+
+            multimedias = multimedia_without_televisores_and_cliente.dump(result, many=True)
+
+            return jsonify(multimedias)
+        else:
+            return {'Error': f"El cliente con el id: {id} no tiene videos"}, 404  # Not Found
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+
+# ======================================================================
+# ======================================================================
 
 
 @multimedia_controller.route("/televisor/videos/<int:id>")
@@ -167,19 +151,24 @@ def get_multimedias_by_televisor_id(id: int):
     #     return {'Error': f"{error}"}, 500  # Internal Error
 
 # Con este metodo estaba obteniendo las Multimedias del Cliente por el Id de este.
-# @multimedia_controller.route("/cliente/<int:id>")
-# def get_multimedias_by_cliente_id(id: int):
-#     try:
-#         multimedias = MultimediaService.getMultimediasByClienteId(id)
 
-#         if multimedias:
-#             multimedias_dict = multimedia_without_televisores.dump(
-#                 multimedias, many=True)  # Aqui estoy usando Marshmallow
-#             return jsonify(multimedias_dict)
-#         else:
-#             return {'Error': messages['not_found'].format(id)}, 404  # Not Found
-#     except Exception as error:
-#         return {'Error': f"{error}"}, 500  # Internal Error
+
+@multimedia_controller.route("/cliente/<int:id>")
+def get_multimedias_by_cliente_id(id: int):
+    try:
+        multimedias = MultimediaService.getMultimediasByClienteId(id)
+
+        if multimedias:
+            multimedias_dict = multimedia_without_televisores_and_cliente.dump(
+                multimedias, many=True)  # Aqui estoy usando Marshmallow
+            return jsonify(multimedias_dict)
+        else:
+            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+# =================================================================
+#                   Con paginador
+# =================================================================
 
 # @multimedia_controller.route("/cliente/<int:id>/<int:page>")
 # def get_multimedias_by_cliente_id(id: int, page: int):

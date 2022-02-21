@@ -18,23 +18,49 @@ class MultimediaService:
     NUMBER_OF_ENTITIES = 1
 
     @staticmethod
-    def get_by_id(id: int):
+    def getById(id: int):
         multimedia = Multimedia.query.filter_by(id=id).first()
         return multimedia
 
     @staticmethod
-    def get_by_ids(ids: List, televisor_id: int):
+    def getImagenesByClienteId(cliente_id):
 
-        stmt = (select(Multimedia)).join(Televisor.multimedias).where(
-            Televisor.id == televisor_id).where(Multimedia.id.in_(ids))
-        results = db.session.execute(stmt).unique().all()
-
+        stmt = select(Multimedia).join(Multimedia.cliente).where(
+            Cliente.id == cliente_id).where(Multimedia.tipo_archivo.contains('image'))
+        results = db.session.execute(stmt).all()
         if len(results) > 0:
             results = [multimedia_tupla[0] for multimedia_tupla in results]
 
             return results
         else:
             return None
+
+    @staticmethod
+    def getVideosByClienteId(cliente_id):
+
+        stmt = select(Multimedia).join(Multimedia.cliente).where(
+            Cliente.id == cliente_id).where(Multimedia.tipo_archivo.contains('video'))
+        results = db.session.execute(stmt).all()
+        if len(results) > 0:
+            results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+            return results
+        else:
+            return None
+
+
+# ======================================================================
+# ======================================================================
+
+
+    @staticmethod
+    def get_by_ids(ids: List):
+
+        stmt = (select(Multimedia)).where(Multimedia.id.in_(ids))
+        results = db.session.execute(stmt).all()
+
+        results = [multimedia_tupla[0] for multimedia_tupla in results]
+        return results
 
     @staticmethod
     def create(data: Dict, idsClientes: Dict):
@@ -49,20 +75,20 @@ class MultimediaService:
         db.session.add(multimedia)
         db.session.commit()
 
-    @staticmethod
-    def borrarMultimedias():
-        # Ver mas tarde como hacerlo mejor
-        multimedias_empty_tuplas = db.engine.execute(
-            "SELECT m.id, m.archivo FROM  multimedias m WHERE m.id NOT IN (SELECT tlm.multimedia_id FROM televisor_multimedia tlm)").all()
-        ids_list = []
+    # @staticmethod
+    # def borrarMultimedias():
+    #     # Ver mas tarde como hacerlo mejor
+    #     multimedias_empty_tuplas = db.engine.execute(
+    #         "SELECT m.id, m.archivo FROM  multimedias m WHERE m.id NOT IN (SELECT tlm.multimedia_id FROM televisor_multimedia tlm)").all()
+    #     ids_list = []
 
-        for multimedia in multimedias_empty_tuplas:
-            os.remove(os.path.join(CARPETA, multimedia[1]))
-            ids_list.append(multimedia[0])
+    #     for multimedia in multimedias_empty_tuplas:
+    #         os.remove(os.path.join(CARPETA, multimedia[1]))
+    #         ids_list.append(multimedia[0])
 
-        sql1 = delete(Multimedia).where(Multimedia.id.in_(ids_list))
-        db.session.execute(sql1)
-        db.session.commit()
+    #     sql1 = delete(Multimedia).where(Multimedia.id.in_(ids_list))
+    #     db.session.execute(sql1)
+    #     db.session.commit()
 
 
 # Obtengo todas las multimedias del cliente. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
@@ -70,7 +96,7 @@ class MultimediaService:
 
     @staticmethod
     def getMultimediasByClienteId(id):
-        stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(Cliente.id == id)
+        stmt = (select(Multimedia)).join(Multimedia.cliente).where(Cliente.id == id)
         results = db.session.execute(stmt).unique().all()
         # Lo que devuelve
         # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
@@ -134,6 +160,20 @@ class MultimediaService:
 # =========================================================
 #                 Eliminar varios entities
 # =========================================================
+
+    # @staticmethod
+    # def get_by_ids(ids: List, televisor_id: int):
+
+    #     stmt = (select(Multimedia)).join(Televisor.multimedias).where(
+    #         Televisor.id == televisor_id).where(Multimedia.id.in_(ids))
+    #     results = db.session.execute(stmt).unique().all()
+
+    #     if len(results) > 0:
+    #         results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+    #         return results
+    #     else:
+    #         return None
 
 # @staticmethod
     # def delete(ids: List):

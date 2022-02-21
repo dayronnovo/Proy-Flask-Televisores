@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields, validates, ValidationError, validate
 
+from schemas.cliente_schemas import ClienteSchema
+
 
 class TelevisorSchema(Schema):
     id = fields.Int(required=True)
@@ -7,8 +9,9 @@ class TelevisorSchema(Schema):
     cliente_id = fields.Int(load_only=True, required=True)
 
     # Relacion
-    cliente = fields.Nested("ClienteSchema", exclude=("televisores",))
-    multimedias = fields.List(fields.Nested("MultimediaSchema", exclude=("televisores",)))
+
+    multimedias = fields.List(fields.Nested("MultimediaSchema", only=('id', "archivo", "tipo_archivo")))
+    cliente = fields.Nested(lambda: ClienteSchema(only=('id', 'nombre')))
 
     @validates('ubicacion')
     def string_vacio(self, cadena: str):

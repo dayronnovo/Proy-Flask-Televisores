@@ -5,7 +5,7 @@ from services.multimedia_service import MultimediaService
 from marshmallow import ValidationError
 from messages.es_ES import messages
 from typing import Dict
-from schemas.general_schemas import televisor_schema, televisor_without_multimedias, televisor_without_multimedias_and_cliente, multimedia_without_televisores, cliente_without_televisores
+from schemas.general_schemas import televisor_schema, televisor_without_multimedias, televisor_without_multimedias_and_cliente, multimedia_without_televisores_and_cliente, cliente_without_televisores
 
 # Creando controlador
 televisor_controller = Blueprint('televisor_controller', __name__)
@@ -60,45 +60,30 @@ def create():
 
 
 # Agrego y quito Multimedias de un Televisor.
-@televisor_controller.route("/update/multimedias/<int:id>", methods=['PUT'])
-def update(id):
+@televisor_controller.route("/update/multimedias", methods=['PUT'])
+def update():
     try:
-        # de parametro recibo el id del televisor
-        # recibir una lista de multimedias que son las que voy a quitar del televisor
 
-        televisor = TelevisorService.get_by_id(id)
+        # print(request.get_json())
+        # print(request.get_json()['televisores'])
+        # print(request.get_json()['multimedias'])
+        if request.get_json().get('televisores') and request.get_json().get('multimedias'):
 
-        if televisor:
+            televisores = TelevisorService.get_by_ids(request.get_json()['televisores'])
+            multimedias = MultimediaService.get_by_ids(request.get_json()['multimedias'])
 
-            multimedias = televisor.multimedias
-            if len(request.get_json()['ids']) > 0:
+            if televisores and multimedias:
+                for televisor in televisores:
 
-                multimedias_temp = multimedia_without_televisores.dump(request.get_json()['ids'], many=True)
+                    televisor.multimedias = multimedias
 
-                ids_temp_multimedias = []
-                multimedias_temp = [Multimedia.constructor(multimedia) for multimedia in multimedias_temp]
+                    TelevisorService.save(televisor)
 
-                for multimedia in multimedias:
-                    if multimedia not in multimedias_temp:
-                        multimedias.remove(multimedia)
-
-                for multimedia in multimedias_temp:
-                    if multimedia not in multimedias:
-                        ids_temp_multimedias.append(multimedia.id)
-
-                multimedias_para_agregar = MultimediaService.get_by_ids(ids_temp_multimedias)
-
-                multimedias.extend(multimedias_para_agregar)
+                return {"Message": "Televisor actualizado con exito."}
             else:
-                multimedias.clear()
-
-            TelevisorService.save(televisor)
-
-            MultimediaService.borrarMultimedias()
-
-            return {"Message": "Televisor actualizado con exito."}
+                return {'Error': "No se encontraron los televisores o las multimedias."}, 404  # Not Found
         else:
-            return {'Error': messages['not_found']}, 404  # Not Found
+            return {'Error': "Es obligatorio enviar los ids de los televisores y de las multimedias."}, 400
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -110,11 +95,8 @@ def get_televisores_by_cliente_id(id: int):
         televisores_temp = TelevisorService.get_televisores_by_cliente_id(id)
         if televisores_temp:
             televisores = televisor_without_multimedias_and_cliente.dump(televisores_temp, many=True)
-            cliente_dict = cliente_without_televisores.dump(televisores_temp[0].cliente)
-            resp_personalizada = {'cliente': cliente_dict, 'televisores': televisores}
-            # print(resp_personalizada)
-            # return jsonify(televisores)
-            return resp_personalizada
+            return jsonify(televisores)
+
         else:
             return {'Error': messages['empty_bd']}, 400  # Bad Request
     except Exception as error:
