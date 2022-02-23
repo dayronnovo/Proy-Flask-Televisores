@@ -6,6 +6,7 @@ from configs import default_config
 from controllers.cliente_rest_controller import cliente_controller
 from controllers.multimedia_rest_controller import multimedia_controller
 from controllers.televisor_rest_controller import televisor_controller
+from controllers.historial_de_programacion_rest_controller import historial_de_programacion_controller
 
 app = Flask(__name__)
 app.config.from_object(default_config)
@@ -31,6 +32,7 @@ def after_request(response):
 app.register_blueprint(cliente_controller, url_prefix='/cliente')
 app.register_blueprint(multimedia_controller, url_prefix='/multimedia')
 app.register_blueprint(televisor_controller, url_prefix='/televisor')
+app.register_blueprint(historial_de_programacion_controller, url_prefix='/historial')
 
 
 if __name__ == '__main__':
