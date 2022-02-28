@@ -68,7 +68,8 @@ class MultimediaService:
         # print(idsClientes)
 
         multimedia = Multimedia.constructor(data)
-        televisores = Televisor.query.filter(Televisor.id.in_(idsClientes['ids'])).all()
+        televisores = Televisor.query.filter(
+            Televisor.id.in_(idsClientes['ids'])).all()
 
         multimedia.televisores = televisores
 
@@ -96,7 +97,8 @@ class MultimediaService:
 
     @staticmethod
     def getMultimediasByClienteId(id):
-        stmt = (select(Multimedia)).join(Multimedia.cliente).where(Cliente.id == id)
+        stmt = (select(Multimedia)).join(
+            Multimedia.cliente).where(Cliente.id == id)
         results = db.session.execute(stmt).unique().all()
         # Lo que devuelve
         # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
@@ -111,15 +113,13 @@ class MultimediaService:
 
     @staticmethod
     def getMultimediasByTelevisorId(id):
-        stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
+        stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(
             Televisor.id == id)
         results = db.session.execute(stmt).all()
-        if len(results) > 0:
-            multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
-            televisor = results[0][1]
-            cliente = results[0][2]
-            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
-            return mapa
+
+        if results:
+            results = [multimedia_tupla[0] for multimedia_tupla in results]
+            return results
         else:
             return None
 
@@ -135,7 +135,8 @@ class MultimediaService:
             multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
             televisor = results[0][1]
             cliente = results[0][2]
-            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            mapa = {'cliente': cliente, 'televisor': televisor,
+                    'multimedias': multimedias}
             return mapa
         else:
             return None
@@ -152,7 +153,8 @@ class MultimediaService:
             multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
             televisor = results[0][1]
             cliente = results[0][2]
-            mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+            mapa = {'cliente': cliente, 'televisor': televisor,
+                    'multimedias': multimedias}
             return mapa
         else:
             return None
@@ -222,3 +224,18 @@ class MultimediaService:
     #         return mapa
     #     else:
     #         return None
+
+
+#     @staticmethod
+#     def getMultimediasByTelevisorId(id):
+#         stmt = (select(Multimedia, Televisor, Cliente)).join(Televisor.multimedias).join(Televisor.cliente).where(
+#             Televisor.id == id)
+#         results = db.session.execute(stmt).all()
+#         if len(results) > 0:
+#             multimedias = [multimedia_tupla[0] for multimedia_tupla in results]
+#             televisor = results[0][1]
+#             cliente = results[0][2]
+#             mapa = {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
+#             return mapa
+#         else:
+#             return None

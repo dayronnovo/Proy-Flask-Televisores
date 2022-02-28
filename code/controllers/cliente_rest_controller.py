@@ -27,9 +27,11 @@ def get_by_id(id: int):
     try:
         cliente: Cliente = ClienteService.get_by_id(id)
         if cliente:
-            return cliente_without_multimedias_and_televisores.dump(cliente)  # Aqui estoy usando Marshmallow
+            # Aqui estoy usando Marshmallow
+            return cliente_without_multimedias_and_televisores.dump(cliente)
         else:
-            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+            # Not Found
+            return {'Error': messages['not_found'].format(id)}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -61,7 +63,8 @@ def agregar_multimedias_a_un_cliente():
         ClienteService.agregar_multimedias_a_un_cliente({'archivo': nombre_archivo, 'tipo_archivo': archivo.content_type},
                                                         request.form.get('cliente_id'))
 
-        return {"Message": messages['entity_created'].format("Multimedia")}, 201  # Created
+        # Created
+        return {"Message": messages['entity_created'].format("Multimedia")}, 201
     except NotFound as error:
         return {'Error': f"{error}"}, 404  # Not Found
     except (RequestEntityTooLarge, ValidationError) as error:
@@ -74,10 +77,13 @@ def agregar_multimedias_a_un_cliente():
 def create():
     try:
         # Ya aqui estoy validando con Marshmallow
-        data: Dict = cliente_schema.load(request.get_json(), partial=("id",))
+        print(request.get_json())
+        data: Dict = cliente_without_multimedias_and_televisores.load(
+            request.get_json(), partial=("id",))
         ClienteService.save(data)
 
-        return {"Message": messages['entity_created'].format("Cliente")}, 201  # Created
+        # Created
+        return {"Message": messages['entity_created'].format("Cliente")}, 201
     except ValidationError as error:
         return {'Error': f"{error}"}, 400  # Bad Request
     except Exception as error:
@@ -96,7 +102,8 @@ def update():
         cliente.nombre = data['nombre']
         ClienteService.update(data)
 
-        return {"Message": messages['"entity_updated'].format("Cliente")}, 201  # Created
+        # Created
+        return {"Message": messages['entity_updated'].format("Cliente")}, 201
     except ValidationError as error:
         return {'Error': f"{error}"}, 400  # Bad Request
     except Exception as error:

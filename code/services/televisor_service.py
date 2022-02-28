@@ -6,6 +6,7 @@ from typing import Dict, List
 from flask_sqlalchemy import Pagination
 from excepciones_personalizadas.excepciones import NotFound
 from sqlalchemy import select
+from services.cliente_service import ClienteService
 
 
 class TelevisorService:
@@ -16,19 +17,24 @@ class TelevisorService:
         televisor = Televisor.query.filter_by(id=id).first()
         return televisor
 
-    @staticmethod
-    def save(data: Dict):
-        televisor = Televisor.constructor(data)
-        cliente = Cliente.query.filter_by(id=data['cliente_id']).first()
-        if not cliente:
-            raise NotFound(f"El cliente con el id: {data['autor_id']} no existe")
-        televisor.cliente = cliente
-        db.session.add(televisor)
-        db.session.commit()
+    # @staticmethod
+    # def save(data: Dict):
+    #     televisor = Televisor.constructor(data)
+    #     cliente = Cliente.query.filter_by(id=data['cliente_id']).first()
+    #     if not cliente:
+    #         raise NotFound(f"El cliente con el id: {data['autor_id']} no existe")
+    #     televisor.cliente = cliente
+    #     db.session.add(televisor)
+    #     db.session.commit()
 
     @staticmethod
-    def create(data: Dict):
+    def create(data: Dict, cliente_id: int):
         televisor = Televisor.constructor(data)
+
+        cliente: Cliente = ClienteService.get_by_id(cliente_id)
+        if cliente:
+            televisor.cliente = cliente
+
         db.session.add(televisor)
         db.session.commit()
 
@@ -38,8 +44,7 @@ class TelevisorService:
         return televisores
 
     @staticmethod
-    def save(televisor: Televisor):
-        db.session.add(televisor)
+    def update(televisor: Televisor):
         db.session.commit()
 
     @staticmethod
@@ -58,7 +63,8 @@ class TelevisorService:
 
     @staticmethod
     def getMultimediasByClienteId(id):
-        stmt = (select(Multimedia)).join(Televisor.multimedias).join(Televisor.cliente).where(Cliente.id == id)
+        stmt = (select(Multimedia)).join(Televisor.multimedias).join(
+            Televisor.cliente).where(Cliente.id == id)
         results = db.session.execute(stmt).unique().all()
         # Lo que devuelve
         # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]

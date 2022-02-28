@@ -26,9 +26,11 @@ def get_multimedias_by_ids(id):
 
     try:
 
-        multimedias = MultimediaService.get_by_ids(request.get_json()['ids'], id)
+        multimedias = MultimediaService.get_by_ids(
+            request.get_json()['ids'], id)
         if multimedias:
-            multimedias = multimedia_without_televisores.dump(multimedias, many=True)
+            multimedias = multimedia_without_televisores.dump(
+                multimedias, many=True)
             return jsonify(multimedias)
         else:
             return {'Error': "No se encontraron multimedias"}, 404  # Not Found
@@ -46,7 +48,8 @@ def get_file(id: int):
         if multimedia:
             return send_from_directory("uploads", multimedia.archivo, as_attachment=True)
         else:
-            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+            # Not Found
+            return {'Error': messages['not_found'].format(id)}, 404
     except FileNotFoundError as error:
         return {'Error': "La imagen no existe."}, 404  # Not Found
     except Exception as error:
@@ -60,11 +63,13 @@ def get_imagenes_by_cliente_id(id: int):
         result = MultimediaService.getImagenesByClienteId(id)
         if result:
 
-            multimedias = multimedia_without_televisores_and_cliente.dump(result, many=True)
+            multimedias = multimedia_without_televisores_and_cliente.dump(
+                result, many=True)
 
             return jsonify(multimedias)
         else:
-            return {'Error': f"El cliente con el id: {id} no tiene imagenes"}, 404  # Not Found
+            # Not Found
+            return {'Error': f"El cliente con el id: {id} no tiene imagenes"}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -77,11 +82,13 @@ def get_videos_by_cliente_id(id: int):
         result = MultimediaService.getVideosByClienteId(id)
         if result:
 
-            multimedias = multimedia_without_televisores_and_cliente.dump(result, many=True)
+            multimedias = multimedia_without_televisores_and_cliente.dump(
+                result, many=True)
 
             return jsonify(multimedias)
         else:
-            return {'Error': f"El cliente con el id: {id} no tiene videos"}, 404  # Not Found
+            # Not Found
+            return {'Error': f"El cliente con el id: {id} no tiene videos"}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -95,12 +102,15 @@ def get_videos_by_televisor_id(id: int):
         result_dict = MultimediaService.getVideosByTelevisorId(id)
         if result_dict:
             cliente = cliente_without_televisores.dump(result_dict['cliente'])
-            televisor = televisor_without_multimedias_and_cliente.dump(result_dict['televisor'])
-            multimedias = multimedia_without_televisores.dump(result_dict['multimedias'], many=True)
+            televisor = televisor_without_multimedias_and_cliente.dump(
+                result_dict['televisor'])
+            multimedias = multimedia_without_televisores.dump(
+                result_dict['multimedias'], many=True)
 
             return {'cliente': cliente, 'televisor': televisor, 'multimedias': multimedias}
         else:
-            return {'Error': f"El televisor con el id: {id} no tiene multimedias"}, 404  # Not Found
+            # Not Found
+            return {'Error': f"El televisor con el id: {id} no tiene multimedias"}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -108,18 +118,17 @@ def get_videos_by_televisor_id(id: int):
 @multimedia_controller.route("/televisor/<int:id>")
 def get_multimedias_by_televisor_id(id: int):
     try:
-        result_dict = MultimediaService.getMultimediasByTelevisorId(id)
-        if result_dict:
-            cliente = cliente_without_televisores.dump(result_dict['cliente'])
-            televisor = televisor_without_multimedias_and_cliente.dump(result_dict['televisor'])
-            multimedias_del_televisor = multimedia_without_televisores.dump(result_dict['multimedias'], many=True)
+        multimedias_dict = MultimediaService.getMultimediasByTelevisorId(id)
+        if multimedias_dict:
 
-            multimedias_del_cliente = multimedia_without_televisores.dump(
-                MultimediaService.getMultimediasByClienteId(cliente['id']), many=True)
+            multimedias_dict = multimedia_without_televisores_and_cliente.dump(
+                multimedias_dict, many=True)
 
-            return {'cliente': cliente, 'televisor': televisor, 'multimedias_televisor': multimedias_del_televisor, 'multimedias_cliente': multimedias_del_cliente}
+            return jsonify(multimedias_dict)
+
         else:
-            return {'Error': f"El televisor con el id: {id} no tiene multimedias"}, 404  # Not Found
+            # Not Found
+            return {'Error': f"El televisor con el id: {id} no tiene multimedias"}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -163,7 +172,8 @@ def get_multimedias_by_cliente_id(id: int):
                 multimedias, many=True)  # Aqui estoy usando Marshmallow
             return jsonify(multimedias_dict)
         else:
-            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+            # Not Found
+            return {'Error': messages['not_found'].format(id)}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 # =================================================================

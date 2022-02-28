@@ -14,29 +14,25 @@ from datetime import datetime
 
 
 class HistorialDeProgramacionService:
-    NUMBER_OF_ENTITIES = 1
+    NUMBER_OF_ENTITIES = 2
 
     @staticmethod
-    def get_historiales_by_cliente_id(id: int):
+    def get_historiales_by_cliente_id(id: int, page, fecha):
+        print("Ejecutando metodo")
         # fecha_de_hoy_otro = datetime.today()
-        fecha_de_hoy = datetime.today().strftime('%Y-%m-%d')
-        fecha_de_hoy_p = datetime.today().strptime(fecha_de_hoy, '%Y-%m-%d')
-        # print(f"fecha_de_hoy_otro: {fecha_de_hoy_otro}, tipo: {type(fecha_de_hoy_otro)}")
-        # print(f"fecha_de_hoy: {fecha_de_hoy}, tipo: {type(fecha_de_hoy)}")
-        # print(f"fecha_de_hoy_p: {fecha_de_hoy_p}, tipo: {type(fecha_de_hoy_p)}")
+        # fecha_de_hoy = datetime.today().strftime('%Y-%m-%d')
+        # fecha_de_hoy_p = datetime.today().strptime(fecha_de_hoy, '%Y-%m-%d')
 
-        stmt = (select(HistorialProgramacion))\
+        historial_paginacion: Pagination = HistorialProgramacion.query\
             .where(HistorialProgramacion.cliente_id == id)\
-            .where(HistorialProgramacion.fecha == fecha_de_hoy_p)\
-            .order_by(HistorialProgramacion.hora_de_inicio)
-        results = db.session.execute(stmt).all()
+            .where(HistorialProgramacion.fecha == fecha)\
+            .order_by(HistorialProgramacion.hora_de_inicio)\
+            .paginate(
+                page=page, per_page=HistorialDeProgramacionService.NUMBER_OF_ENTITIES, error_out=False)
 
-        if results:
-            results = [multimedia_tupla[0] for multimedia_tupla in results]
+        print(historial_paginacion.items)
 
-            return results
-        else:
-            return None
+        return historial_paginacion
 
     @staticmethod
     def create(data: Dict, multimedias, televisores, cliente_id):

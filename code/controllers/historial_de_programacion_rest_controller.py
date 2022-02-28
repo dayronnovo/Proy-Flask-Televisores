@@ -9,20 +9,31 @@ from typing import Dict
 from schemas.general_schemas import historial_programacion_without_cliente_multimedia_televisor, historial_programacion_without_cliente, historial_programacion
 
 # Creando controlador
-historial_de_programacion_controller = Blueprint('historial_de_programacion_controller', __name__)
+historial_de_programacion_controller = Blueprint(
+    'historial_de_programacion_controller', __name__)
 
 
-# Devuelve un objeto Televisor con su Cliente.
-@historial_de_programacion_controller.route("/<int:id>")
-def get_historiales_by_cliente_id(id: int):
+@historial_de_programacion_controller.route("/<int:id>/<int:page>", methods=['PUT'], strict_slashes=False)
+def get_historiales_by_cliente_id(id: int, page: int):
+    # print("Controlador: ")
+    # print(request.get_json())
+    # print(id)
+    # print(page)
+
     try:
-        historiales_programacion = HistorialDeProgramacionService.get_historiales_by_cliente_id(id)
-        if historiales_programacion:
-            historiales_programacion = historial_programacion_without_cliente.dump(
-                historiales_programacion, many=True)
-            return jsonify(historiales_programacion)
+        result = HistorialDeProgramacionService.get_historiales_by_cliente_id(
+            id, page, request.get_json()['fecha'])
+        if result.items:
+            historial_programacion_dict = historial_programacion_without_cliente.dump(
+                result.items, many=True)
+
+            json_temp = {'historiales': historial_programacion_dict,  'pageable': {
+                'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}
+
+            return json_temp
         else:
-            return {'Error': messages['not_found'].format(id)}, 404  # Not Found
+            # Not Found
+            return {'Error': messages['not_found'].format(id)}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -30,7 +41,7 @@ def get_historiales_by_cliente_id(id: int):
 @historial_de_programacion_controller.route("/", methods=['POST'], strict_slashes=False)
 def create():
     try:
-        print(request.get_json())
+        # print(request.get_json())
         historial_programacion_dict = {'hora_de_inicio': request.get_json(
         )['hora_de_inicio'], 'time_id': request.get_json()['time_id']}
 
@@ -40,7 +51,8 @@ def create():
         HistorialDeProgramacionService.create(
             data, request.get_json()['multimedias'], request.get_json()['televisores'], request.get_json()['cliente'])
 
-        return {"Message": messages['entity_created'].format("Televisor")}, 201  # Created
+        # Created
+        return {"Message": messages['entity_created'].format("Televisor")}, 201
     except NotFound as error:
         return {'Error': f"{error}"}, 404  # NotFound
     except ValidationError as error:
