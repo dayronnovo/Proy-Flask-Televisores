@@ -23,17 +23,15 @@ def get_historiales_by_cliente_id(id: int, page: int):
     try:
         result = HistorialDeProgramacionService.get_historiales_by_cliente_id(
             id, page, request.get_json()['fecha'])
-        if result.items:
-            historial_programacion_dict = historial_programacion_without_cliente.dump(
-                result.items, many=True)
 
-            json_temp = {'historiales': historial_programacion_dict,  'pageable': {
-                'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}
+        historial_programacion_dict = historial_programacion_without_cliente.dump(
+            result.items, many=True)
 
-            return json_temp
-        else:
-            # Not Found
-            return {'Error': messages['not_found'].format(id)}, 404
+        json_temp = {'historiales': historial_programacion_dict,  'pageable': {
+            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}
+
+        return json_temp
+
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -41,7 +39,9 @@ def get_historiales_by_cliente_id(id: int, page: int):
 @historial_de_programacion_controller.route("/", methods=['POST'], strict_slashes=False)
 def create():
     try:
-        # print(request.get_json())
+        if(request.get_json()['hora_de_inicio'] == 'null'):
+            request.get_json()['hora_de_inicio'] = '00:00:00'
+
         historial_programacion_dict = {'hora_de_inicio': request.get_json(
         )['hora_de_inicio'], 'time_id': request.get_json()['time_id']}
 

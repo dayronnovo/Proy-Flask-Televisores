@@ -109,7 +109,7 @@ def update_multimedias():
 
                     televisor.multimedias = multimedias
 
-                    TelevisorService.save(televisor)
+                    TelevisorService.update(televisor)
 
                 return {"Message": "Televisor actualizado con exito."}
             else:
