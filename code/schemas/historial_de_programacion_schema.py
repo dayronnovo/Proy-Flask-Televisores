@@ -5,13 +5,15 @@ from datetime import datetime
 
 class HistorialProgramacion(Schema):
     id = fields.Int()
-    hora_de_inicio = fields.String()
+    hora_de_inicio = fields.Time()
     time_id = fields.Int()
     fecha = fields.Date(missing=datetime.today().strftime('%Y-%m-%d'))
 
     # Relacion con Televisor
-    televisores = fields.List(fields.Nested("TelevisorSchema", only=("id", "ubicacion")))
+    televisores = fields.List(fields.Nested(
+        "TelevisorSchema", only=("id", "ubicacion")))
     # Relacion con Multimedia
-    multimedias = fields.List(fields.Nested("MultimediaSchema", only=("id", "archivo", "tipo_archivo")))
+    multimedias = fields.List(fields.Nested(
+        "MultimediaSchema", only=("id", "archivo", "tipo_archivo")))
     # Relacion con Televisor
     cliente = fields.Nested("ClienteSchema", only=("id", "nombre"))

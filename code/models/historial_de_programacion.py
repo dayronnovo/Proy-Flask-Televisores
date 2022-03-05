@@ -5,12 +5,13 @@ class HistorialProgramacion(db.Model):
 
     __tablename__ = 'historial_de_programacion'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    hora_de_inicio = db.Column(db.String(80), nullable=False)
+    hora_de_inicio = db.Column(db.Time, nullable=False)
     time_id = db.Column(db.Integer, nullable=False)
     fecha = db.Column(db.Date, nullable=False)
 
     # relacion con cliente (ManyToOne Unidireccional)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    cliente_id = db.Column(db.Integer, db.ForeignKey(
+        'clientes.id'), nullable=False)
     cliente = db.relationship('Cliente')
 
     # relacion con multimedia (ManyToMany Unidireccional)

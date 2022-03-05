@@ -5,7 +5,7 @@ from models.historial_de_programacion import HistorialProgramacion
 from typing import Dict, List
 from flask_sqlalchemy import Pagination
 from excepciones_personalizadas.excepciones import NotFound
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from services.cliente_service import ClienteService
 from services.multimedia_service import MultimediaService
 from services.televisor_service import TelevisorService
@@ -26,7 +26,7 @@ class HistorialDeProgramacionService:
         historial_paginacion: Pagination = HistorialProgramacion.query\
             .where(HistorialProgramacion.cliente_id == id)\
             .where(HistorialProgramacion.fecha == fecha)\
-            .order_by(HistorialProgramacion.hora_de_inicio)\
+            .order_by(desc(HistorialProgramacion.hora_de_inicio))\
             .paginate(
                 page=page, per_page=HistorialDeProgramacionService.NUMBER_OF_ENTITIES, error_out=False)
 
