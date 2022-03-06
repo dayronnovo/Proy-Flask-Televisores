@@ -12,7 +12,6 @@ from schemas.general_schemas import televisor_schema, televisor_without_multimed
 televisor_controller = Blueprint('televisor_controller', __name__)
 
 
-# Devuelve un objeto Televisor con su Cliente.
 @televisor_controller.route("/<int:id>")
 def get_by_id(id: int):
     try:
@@ -35,14 +34,9 @@ def get_televisores_by_cliente_id_with_pagination(id: int, page: int):
             id, page)
         televisores = televisor_without_multimedias_and_cliente.dump(
             result.items, many=True)
-        cliente = None
 
-        cliente = ClienteService.get_by_id(id)
-
-        cliente = cliente_without_multimedias_and_televisores.dump(cliente)
-
-        json_temp = {'content': {'cliente': cliente, 'televisores': televisores},  'pageable': {
-            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}
+        json_temp = {'televisores': televisores,  'pageable': {
+            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total, 'has_next': result.has_next, 'has_prev': result.has_prev}}
 
         return json_temp
     except Exception as error:
