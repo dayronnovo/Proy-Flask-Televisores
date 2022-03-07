@@ -15,7 +15,7 @@ CARPETA = os.path.abspath("./code/uploads/")
 
 
 class MultimediaService:
-    NUMBER_OF_ENTITIES = 1
+    NUMBER_OF_ENTITIES = 3
 
     @staticmethod
     def getById(id: int):
@@ -76,6 +76,10 @@ class MultimediaService:
         db.session.add(multimedia)
         db.session.commit()
 
+    @staticmethod
+    def update():
+        db.session.commit()
+
     # @staticmethod
     # def borrarMultimedias():
     #     # Ver mas tarde como hacerlo mejor
@@ -94,18 +98,24 @@ class MultimediaService:
 
 # Obtengo todas las multimedias del cliente. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
 
-
     @staticmethod
-    def getMultimediasByClienteId(id):
-        stmt = (select(Multimedia)).join(
-            Multimedia.cliente).where(Cliente.id == id)
-        results = db.session.execute(stmt).unique().all()
-        # Lo que devuelve
-        # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
+    def getMultimediasByClienteIdWithPagination(id: int, page: int):
 
-        results = [multimedia_tupla[0] for multimedia_tupla in results]
+        multimedias: Pagination = Multimedia.query.filter_by(cliente_id=id).paginate(
+            page, per_page=MultimediaService.NUMBER_OF_ENTITIES, error_out=False)
+        return multimedias
 
-        return results
+    # @staticmethod
+    # def getMultimediasByClienteId(id):
+    #     stmt = (select(Multimedia)).join(
+    #         Multimedia.cliente).where(Cliente.id == id)
+    #     results = db.session.execute(stmt).unique().all()
+    #     # Lo que devuelve
+    #     # [(Multimedia => [id: 68, archivo: 4a011513e36f45ae905afb592be47c0f.png],), (Multimedia => [id: 69, archivo: 6500e83ebe82410c97079050f4fc69c8.png],), (Multimedia => [id: 70, archivo: 2c693cc38a3c48a0ae360629d19b8c7d.png],), (Multimedia => [id: 71, archivo: d867d9166cf44f15961487545c6b559a.png],)]
+
+    #     results = [multimedia_tupla[0] for multimedia_tupla in results]
+
+    #     return results
 
 
 # Obtengo todas las multimedias del televisor. Lo uso en el ReutilizarMultimediasComponent para poder marcar en el checked
@@ -140,6 +150,18 @@ class MultimediaService:
             return mapa
         else:
             return None
+
+    @staticmethod
+    def delete(multimedias):
+
+        ids_list = []
+        for multimedia in multimedias:
+            os.remove(os.path.join(CARPETA, multimedia.archivo))
+            ids_list.append(multimedia.id)
+
+        sql1 = delete(Multimedia).where(Multimedia.id.in_(ids_list))
+        db.session.execute(sql1)
+        db.session.commit()
 
 
 # Obtengo todos los videos del televisor. Lo uso en el ImagenesComponent para poder marcar en el checked. Es necesareo separarlos para obligar a que se deban escoger imagenes o videos. Nunca los dos juntos.

@@ -9,9 +9,13 @@ class TelevisorSchema(Schema):
     # cliente_id = fields.Int(load_only=True, required=True)
 
     # Relacion
-
     multimedias = fields.List(fields.Nested(
         "MultimediaSchema", only=('id', "archivo", "tipo_archivo")))
+
+    # Relacion
+    historiales = fields.List(fields.Nested("HistorialProgramacionSchema", only=(
+        "id", "hora_de_inicio", "time_id", "fecha")))
+
     cliente = fields.Nested(lambda: ClienteSchema(only=('id', 'nombre')))
 
     @validates('ubicacion')

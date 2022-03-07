@@ -1,4 +1,6 @@
 from conexion_bd_mysql import db
+from models.televisor import association_table_historial_televisores
+from models.multimedia import association_table_historial_multimedias
 
 
 class HistorialProgramacion(db.Model):
@@ -14,17 +16,13 @@ class HistorialProgramacion(db.Model):
         'clientes.id'), nullable=False)
     cliente = db.relationship('Cliente')
 
-    # relacion con multimedia (ManyToMany Unidireccional)
-    association_table = db.Table('historial_multimedias', db.metadata, db.Column('historial_id', db.ForeignKey(
-        'historial_de_programacion.id'), primary_key=True), db.Column('multimedia_id', db.ForeignKey('multimedias.id'), primary_key=True))
+    # relacion con multimedia (ManyToMany Bidireccional)
+    multimedias = db.relationship(
+        "Multimedia", secondary=association_table_historial_multimedias, back_populates="historiales")
 
-    multimedias = db.relationship("Multimedia", secondary=association_table)
-
-    # relacion con Televisor (ManyToMany Unidireccional)
-    association_table = db.Table('historial_televisores', db.metadata, db.Column('historial_id', db.ForeignKey(
-        'historial_de_programacion.id'), primary_key=True), db.Column('televisor_id', db.ForeignKey('televisores.id'), primary_key=True))
-
-    televisores = db.relationship("Televisor", secondary=association_table)
+    # relacion con Televisor (ManyToMany Bidireccional)
+    televisores = db.relationship(
+        "Televisor", secondary=association_table_historial_televisores, back_populates="historiales")
 
     def __init__(self, id, hora_de_inicio, time_id, fecha) -> None:
         self.id = id

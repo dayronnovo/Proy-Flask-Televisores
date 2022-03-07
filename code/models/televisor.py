@@ -1,10 +1,15 @@
 from conexion_bd_mysql import db
 from typing import Dict
 
-association_table = db.Table('televisor_multimedia', db.metadata,
-                             db.Column('televisor_id', db.ForeignKey('televisores.id'), primary_key=True),
-                             db.Column('multimedia_id', db.ForeignKey('multimedias.id'), primary_key=True)
-                             )
+association_table_televisor_multimedia = db.Table('televisor_multimedia', db.metadata,
+                                                  db.Column('televisor_id', db.ForeignKey(
+                                                      'televisores.id'), primary_key=True),
+                                                  db.Column('multimedia_id', db.ForeignKey(
+                                                      'multimedias.id'), primary_key=True)
+                                                  )
+
+association_table_historial_televisores = db.Table('historial_televisores', db.metadata, db.Column('historial_id', db.ForeignKey(
+    'historial_de_programacion.id'), primary_key=True), db.Column('televisor_id', db.ForeignKey('televisores.id'), primary_key=True))
 
 
 class Televisor(db.Model):
@@ -13,11 +18,17 @@ class Televisor(db.Model):
     ubicacion = db.Column(db.String(80), nullable=False)
 
     # relacion con cliente
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    cliente_id = db.Column(db.Integer, db.ForeignKey(
+        'clientes.id'), nullable=False)
     cliente = db.relationship('Cliente', back_populates="televisores")
 
     # relacion con multimedia
-    multimedias = db.relationship("Multimedia", secondary=association_table, back_populates="televisores")
+    multimedias = db.relationship(
+        "Multimedia", secondary=association_table_televisor_multimedia, back_populates="televisores")
+
+    # relacion con historial
+    historiales = db.relationship(
+        "HistorialProgramacion", secondary=association_table_historial_televisores, back_populates="televisores")
 
     def __init__(self, id, ubicacion) -> None:
         self.id = id

@@ -1,6 +1,9 @@
 from conexion_bd_mysql import db
 from typing import Dict
-from models.televisor import association_table
+from models.televisor import association_table_televisor_multimedia
+
+association_table_historial_multimedias = db.Table('historial_multimedias', db.metadata, db.Column('historial_id', db.ForeignKey(
+    'historial_de_programacion.id'), primary_key=True), db.Column('multimedia_id', db.ForeignKey('multimedias.id'), primary_key=True))
 
 
 class Multimedia(db.Model):
@@ -10,10 +13,16 @@ class Multimedia(db.Model):
     tipo_archivo = db.Column(db.String(80), nullable=False)
 
     # relacion con Televisor
-    televisores = db.relationship("Televisor", secondary=association_table, back_populates="multimedias")
+    televisores = db.relationship(
+        "Televisor", secondary=association_table_televisor_multimedia, back_populates="multimedias")
+
+    # relacion con historial
+    historiales = db.relationship(
+        "HistorialProgramacion", secondary=association_table_historial_multimedias, back_populates="multimedias")
 
     # relacion con cliente
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    cliente_id = db.Column(db.Integer, db.ForeignKey(
+        'clientes.id'), nullable=False)
     cliente = db.relationship('Cliente', back_populates="multimedias")
 
     def __init__(self, id,  archivo, tipo_archivo) -> None:

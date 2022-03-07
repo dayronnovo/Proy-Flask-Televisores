@@ -3,7 +3,7 @@ from schemas.cliente_schemas import ClienteSchema
 from datetime import datetime
 
 
-class HistorialProgramacion(Schema):
+class HistorialProgramacionSchema(Schema):
     id = fields.Int()
     hora_de_inicio = fields.Time()
     time_id = fields.Int()

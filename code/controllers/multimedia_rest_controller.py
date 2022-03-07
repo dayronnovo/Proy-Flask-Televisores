@@ -162,18 +162,44 @@ def get_multimedias_by_televisor_id(id: int):
 # Con este metodo estaba obteniendo las Multimedias del Cliente por el Id de este.
 
 
-@multimedia_controller.route("/cliente/<int:id>")
-def get_multimedias_by_cliente_id(id: int):
+@multimedia_controller.route("/cliente/<int:id>/<int:page>")
+def getMultimediasByClienteIdWithPagination(id: int, page: int):
     try:
-        multimedias = MultimediaService.getMultimediasByClienteId(id)
+        result = MultimediaService.getMultimediasByClienteIdWithPagination(
+            id, page)
+        multimedias = multimedia_without_televisores_and_cliente.dump(
+            result.items, many=True)
+
+        json_temp = {'multimedias': multimedias,  'pageable': {
+            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total, 'has_next': result.has_next, 'has_prev': result.has_prev}}
+
+        return json_temp
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+
+
+@multimedia_controller.route("/delete", methods=['PUT'], strict_slashes=False)
+def delete():
+    try:
+
+        print(request.get_json())
+
+        multimedias = MultimediaService.get_by_ids(
+            request.get_json()['multimedias'])
 
         if multimedias:
-            multimedias_dict = multimedia_without_televisores_and_cliente.dump(
-                multimedias, many=True)  # Aqui estoy usando Marshmallow
-            return jsonify(multimedias_dict)
+            for multimedia in multimedias:
+                multimedia.televisores.clear()
+                multimedia.historiales.clear()
+
+                MultimediaService.update()
+
+            MultimediaService.delete(multimedias)
+
+            return {"Message": "Multimedias eliminadas con exito."}, 200
         else:
             # Not Found
-            return {'Error': messages['not_found'].format(id)}, 404
+            return {'Error': "No se encontraron multimedias."}, 404
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 # =================================================================

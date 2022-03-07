@@ -6,19 +6,19 @@ from services.cliente_service import ClienteService
 from marshmallow import ValidationError
 from messages.es_ES import messages
 from typing import Dict
-from schemas.general_schemas import televisor_schema, televisor_without_multimedias, televisor_without_multimedias_and_cliente, multimedia_without_televisores_and_cliente, cliente_without_televisores, cliente_without_multimedias_and_televisores
+from schemas.general_schemas import televisor_schema, televisor_without_multimedias, televisor_without_multimedias_and_cliente, multimedia_without_televisores_and_cliente, cliente_without_televisores, cliente_without_multimedias_and_televisores, televisor_without_multimedias_cliente_historiales
 
 # Creando controlador
 televisor_controller = Blueprint('televisor_controller', __name__)
 
 
 @televisor_controller.route("/<int:id>")
-def get_by_id(id: int):
+def getById(id: int):
     try:
         televisor: Televisor = TelevisorService.get_by_id(id)
         if televisor:
             # Aqui estoy usando Marshmallow
-            return televisor_without_multimedias.dump(televisor)
+            return televisor_without_multimedias_cliente_historiales.dump(televisor)
         else:
             # Not Found
             return {'Error': messages['not_found'].format(id)}, 404
@@ -28,7 +28,7 @@ def get_by_id(id: int):
 
 # Obtengo una lista de televisores con paginacion.
 @televisor_controller.route("/cliente/<int:id>/<int:page>")
-def get_televisores_by_cliente_id_with_pagination(id: int, page: int):
+def getTelevisoresByClienteIdWithPagination(id: int, page: int):
     try:
         result = TelevisorService.get_televisores_by_cliente_id_with_pagination(
             id, page)
@@ -127,5 +127,21 @@ def get_televisores_by_cliente_id(id: int):
 
         else:
             return {'Error': messages['empty_bd']}, 400  # Bad Request
+    except Exception as error:
+        return {'Error': f"{error}"}, 500  # Internal Error
+
+
+@televisor_controller.route("/historial/<int:id>/<int:page>")
+def getTelevisoresByHistorialIdWithPagination(id: int, page: int):
+    try:
+        result = TelevisorService.getTelevisoresByHistorialIdWithPagination(
+            id, page)
+        televisores = televisor_without_multimedias_cliente_historiales.dump(
+            result.items, many=True)
+
+        json_temp = {'televisores': televisores,  'pageable': {
+            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total, 'has_next': result.has_next, 'has_prev': result.has_prev}}
+
+        return json_temp
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error

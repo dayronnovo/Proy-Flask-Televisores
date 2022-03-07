@@ -2,6 +2,7 @@ from conexion_bd_mysql import db
 from models.televisor import Televisor
 from models.cliente import Cliente
 from models.multimedia import Multimedia
+from models.historial_de_programacion import HistorialProgramacion
 from typing import Dict, List
 from flask_sqlalchemy import Pagination
 from excepciones_personalizadas.excepciones import NotFound
@@ -82,3 +83,14 @@ class TelevisorService:
         results = [televisor_tupla[0] for televisor_tupla in results]
 
         return results
+
+    @staticmethod
+    def getTelevisoresByHistorialIdWithPagination(id: int, page: int):
+
+        televisores: Pagination = Televisor.query\
+            .join(Televisor.historiales)\
+            .where(HistorialProgramacion.id == id)\
+            .paginate(
+                page, per_page=TelevisorService.NUMBER_OF_ENTITIES, error_out=False)
+
+        return televisores
