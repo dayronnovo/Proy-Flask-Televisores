@@ -19,3 +19,6 @@ $ pip install -r requirements.txt
 ```
 python .\code\app.py
 ```
+
+### Note
+El sistema de gestión de bases de datos relacional que se usa es MySQL. La configuracion para la conexion con la base de datos esta en 'configs/default_config.py' en modo desarrollo y para modo produccion en 'configs/config.py'.
