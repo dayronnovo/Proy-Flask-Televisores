@@ -17,10 +17,6 @@ historial_de_programacion_controller = Blueprint(
 
 @historial_de_programacion_controller.route("/<int:id>/<int:page>", methods=['PUT'], strict_slashes=False)
 def get_historiales_by_cliente_id(id: int, page: int):
-    # print("Controlador: ")
-    # print(request.get_json())
-    # print(id)
-    # print(page)
 
     try:
         result = HistorialDeProgramacionService.get_historiales_by_cliente_id(
@@ -43,9 +39,6 @@ def get_historiales_by_cliente_id(id: int, page: int):
                 'number': result_televisores.page - 1, 'totalPages': result_televisores.pages, 'totalEntities': result_televisores.total, 'has_next': result_televisores.has_next, 'has_prev': result_televisores.has_prev}}
 
             lista_de_historiales_map.append(historial_map)
-
-        # historial_programacion_dict = historial_programacion_without_cliente_televisor.dump(
-        #     result.items, many=True)
 
         json_temp = {'historiales': lista_de_historiales_map,  'pageable': {
             'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total}}

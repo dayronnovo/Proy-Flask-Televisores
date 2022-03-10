@@ -18,9 +18,6 @@ class HistorialDeProgramacionService:
 
     @staticmethod
     def get_historiales_by_cliente_id(id: int, page, fecha):
-        # fecha_de_hoy_otro = datetime.today()
-        # fecha_de_hoy = datetime.today().strftime('%Y-%m-%d')
-        # fecha_de_hoy_p = datetime.today().strptime(fecha_de_hoy, '%Y-%m-%d')
 
         historial_paginacion: Pagination = HistorialProgramacion.query\
             .where(HistorialProgramacion.cliente_id == id)\

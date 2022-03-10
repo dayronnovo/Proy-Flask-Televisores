@@ -1,12 +1,10 @@
 from flask import Blueprint, request, jsonify
-from models.multimedia import Multimedia
 from services.televisor_service import TelevisorService, Televisor, NotFound
 from services.multimedia_service import MultimediaService
-from services.cliente_service import ClienteService
 from marshmallow import ValidationError
 from messages.es_ES import messages
 from typing import Dict
-from schemas.general_schemas import televisor_schema, televisor_without_multimedias, televisor_without_multimedias_and_cliente, multimedia_without_televisores_and_cliente, cliente_without_televisores, cliente_without_multimedias_and_televisores, televisor_without_multimedias_cliente_historiales
+from schemas.general_schemas import televisor_without_multimedias_and_cliente, televisor_without_multimedias_cliente_historiales
 
 # Creando controlador
 televisor_controller = Blueprint('televisor_controller', __name__)
@@ -87,10 +85,6 @@ def update():
 @televisor_controller.route("/update/multimedias", methods=['PUT'])
 def update_multimedias():
     try:
-
-        # print(request.get_json())
-        # print(request.get_json()['televisores'])
-        # print(request.get_json()['multimedias'])
         if request.get_json().get('televisores') and request.get_json().get('multimedias'):
 
             televisores = TelevisorService.get_by_ids(
@@ -115,7 +109,6 @@ def update_multimedias():
         return {'Error': f"{error}"}, 500  # Internal Error
 
 
-# Obtengo todos los televisores de un cliente con su Cliente. Lo uso en el ReutilizarMultimediasComponent.
 @televisor_controller.route("/cliente/<int:id>")
 def get_televisores_by_cliente_id(id: int):
     try:
