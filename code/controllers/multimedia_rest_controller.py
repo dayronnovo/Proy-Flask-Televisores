@@ -165,15 +165,20 @@ def get_multimedias_by_televisor_id(id: int):
 @multimedia_controller.route("/cliente/<int:id>/<int:page>")
 def getMultimediasByClienteIdWithPagination(id: int, page: int):
     try:
+        print(page)
         result = MultimediaService.getMultimediasByClienteIdWithPagination(
             id, page)
-        multimedias = multimedia_without_televisores_and_cliente.dump(
-            result.items, many=True)
 
-        json_temp = {'multimedias': multimedias,  'pageable': {
-            'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total, 'has_next': result.has_next, 'has_prev': result.has_prev}}
+        # multimedias = multimedia_without_televisores_and_cliente.dump(
+        #     result.items, many=True)
 
-        return json_temp
+        # json_temp = {'multimedias': multimedias,  'pageable': {
+        #     'number': result.page - 1, 'totalPages': result.pages, 'totalEntities': result.total, 'has_next': result.has_next, 'has_prev': result.has_prev}}
+
+        # return {"message": "ok"}
+        print(result)
+
+        return result
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 

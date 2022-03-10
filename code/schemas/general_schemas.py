@@ -28,6 +28,8 @@ multimedia_without_televisores = MultimediaSchema(exclude=("televisores",))
 multimedia_without_cliente = MultimediaSchema(exclude=("cliente",))
 multimedia_without_televisores_and_cliente = MultimediaSchema(
     exclude=("televisores", "cliente"))
+multimedia_without_televisores_and_cliente_historial = MultimediaSchema(
+    exclude=("televisores", "cliente", "historiales"))
 # inicializando el ArchivoSchema
 archivo_schema = ArchivoSchema()
 
