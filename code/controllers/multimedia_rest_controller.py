@@ -1,5 +1,5 @@
 from flask import Blueprint, request, send_from_directory, jsonify
-from services.multimedia_service import MultimediaService, NotFound, Multimedia
+from services.multimedia_service import MultimediaService, Multimedia
 from messages.es_ES import messages
 import os
 from schemas.general_schemas import multimedia_without_televisores_and_cliente, multimedia_without_televisores, cliente_without_televisores, televisor_without_multimedias_and_cliente
@@ -25,8 +25,7 @@ def get_multimedias_by_ids(id):
             return jsonify(multimedias)
         else:
             return {'Error': "No se encontraron multimedias"}, 404  # Not Found
-    except NotFound as error:
-        return {'Error': f"{error}"}, 404  # NotFound
+
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
