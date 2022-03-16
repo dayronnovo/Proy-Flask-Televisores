@@ -13,21 +13,24 @@ login_controller = Blueprint('login_controller', __name__)
 def login():
     try:
         # Tengo que validar esto con Marshmallow
-        email = request.get_json()['email']
-        password = request.get_json()['password']
+        # email = request.get_json()['email']
+        # password = request.get_json()['password']
 
-        usuario: Usuario = UsuarioService.get_by_email(email)
-        print(usuario)
+        usuario_dict = usuario_schema_without_roles.load(
+            request.get_json(), partial=("id",))
+        print(usuario_dict)
+
+        usuario: Usuario = UsuarioService.get_by_email(usuario_dict['email'])
         if usuario:
 
-            if bcrypt.checkpw(password.encode('utf-8'), usuario.password.encode('utf-8')):
+            if bcrypt.checkpw(usuario_dict['password'].encode('utf-8'), usuario.password.encode('utf-8')):
 
                 roles_list = [role.name for role in usuario.roles]
 
                 access_token = create_access_token(
-                    identity={'email': email, 'authorities': roles_list}, fresh=True)
+                    identity={'email': usuario.email, 'authorities': roles_list}, fresh=True)
                 refresh_token = create_refresh_token(
-                    identity={'email': email, 'authorities': roles_list})
+                    identity={'email': usuario.email, 'authorities': roles_list})
 
                 return {'access_token': access_token, 'refresh_token': refresh_token}
 
@@ -46,7 +49,6 @@ def refresh_token():
     try:
 
         identity = get_jwt_identity()
-        # print(identity)
 
         access_token = create_access_token(
             identity=identity, fresh=False)
