@@ -12,6 +12,8 @@ from controllers.televisor_rest_controller import televisor_controller
 from controllers.historial_de_programacion_rest_controller import historial_de_programacion_controller
 from controllers.login_rest_controller import login_controller
 from configs.jwt_config import JwtConfig
+from configs.basic_config import auth, users
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 app.config.from_object(default_config)
@@ -30,6 +32,14 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=2)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(minutes=6)
 
 jwt = JWTManager(app)
+
+
+# Basic Athentication
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and \
+            check_password_hash(users.get(username), password):
+        return username
 
 
 @app.before_first_request

@@ -5,11 +5,12 @@ from schemas.general_schemas import usuario_schema, usuario_schema_without_roles
 import bcrypt
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 import jwt
-
+from configs.basic_config import auth
 login_controller = Blueprint('login_controller', __name__)
 
 
 @login_controller.route("/", methods=['POST'], strict_slashes=False)
+@auth.login_required
 def login():
     try:
         # Tengo que validar esto con Marshmallow
