@@ -1,12 +1,8 @@
 from conexion_bd_mysql import db
 from typing import Dict
 
-association_table_televisor_multimedia = db.Table('televisor_multimedia', db.metadata,
-                                                  db.Column('televisor_id', db.ForeignKey(
-                                                      'televisores.id'), primary_key=True),
-                                                  db.Column('multimedia_id', db.ForeignKey(
-                                                      'multimedias.id'), primary_key=True)
-                                                  )
+association_table_televisor_multimedia = db.Table('televisor_multimedia', db.metadata, db.Column('televisor_id', db.    ForeignKey(
+    'televisores.id'), primary_key=True), db.Column('multimedia_id', db.ForeignKey('multimedias.id'), primary_key=True))
 
 association_table_historial_televisores = db.Table('historial_televisores', db.metadata, db.Column('historial_id', db.ForeignKey(
     'historial_de_programacion.id'), primary_key=True), db.Column('televisor_id', db.ForeignKey('televisores.id'), primary_key=True))

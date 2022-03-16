@@ -4,7 +4,6 @@ from marshmallow import ValidationError
 from messages.es_ES import messages
 from typing import Dict
 from schemas.general_schemas import cliente_schema, cliente_without_televisores, cliente_without_multimedias_and_televisores, archivo_schema
-
 from flask import Blueprint, request
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.datastructures import FileStorage
@@ -13,6 +12,11 @@ import os
 import uuid
 from excepciones_personalizadas.excepciones import NotFound
 
+from flask_jwt_extended import jwt_required
+from configs.jwt_config import admin_required
+# from app import admin_required
+
+
 # Creando controlador
 cliente_controller = Blueprint('cliente_controller', __name__)
 
@@ -20,8 +24,15 @@ CARPETA = os.path.abspath("./code/uploads/")
 
 
 @cliente_controller.route("/<int:id>")
-def get_by_id(id: int):
+# @jwt_required(locations=["headers"])
+@jwt_required()
+def get_by_id(id):
     try:
+
+        # print(f"prueba: {request.args.get('id')}")
+        # print(f"prueba: {request.view_args}")
+        # id = request.view_args['id']
+
         cliente: Cliente = ClienteService.get_by_id(id)
         if cliente:
 
@@ -96,6 +107,7 @@ def update():
 
 
 @cliente_controller.route("/page/<int:page>")
+@admin_required()
 def get_all_pagination(page=1):
     try:
 

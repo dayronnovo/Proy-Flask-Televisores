@@ -1,5 +1,7 @@
 # Aqui voy a poner todos los schemas para que no ocurra la importacion circular
 
+from schemas.role_schema import RoleSchema
+from schemas.usuario_schema import UsuarioSchema
 from schemas.cliente_schemas import ClienteSchema
 from schemas.televisor_schemas import TelevisorSchema
 from schemas.multimedia_schema import MultimediaSchema
@@ -41,3 +43,10 @@ historial_programacion_without_cliente_televisor = HistorialProgramacionSchema(
 historial_programacion_without_cliente = HistorialProgramacionSchema(
     exclude=("cliente",))
 historial_programacion = HistorialProgramacionSchema()
+
+# inicializando el UsuarioSchema
+usuario_schema = UsuarioSchema()
+usuario_schema_without_roles = UsuarioSchema(exclude=("roles",))
+# inicializando el RoleSchema
+role_schema = RoleSchema()
+role_schema_without_usuarios = RoleSchema(exclude=("usuarios", "id"))

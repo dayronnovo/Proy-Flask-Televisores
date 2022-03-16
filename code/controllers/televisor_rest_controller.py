@@ -6,11 +6,15 @@ from messages.es_ES import messages
 from typing import Dict
 from schemas.general_schemas import televisor_without_multimedias_and_cliente, televisor_without_multimedias_cliente_historiales
 
+from flask_jwt_extended import jwt_required
+from configs.jwt_config import admin_required
+
 # Creando controlador
 televisor_controller = Blueprint('televisor_controller', __name__)
 
 
 @televisor_controller.route("/<int:id>")
+@jwt_required(fresh=True)
 def getById(id: int):
     try:
         televisor: Televisor = TelevisorService.get_by_id(id)
@@ -26,6 +30,8 @@ def getById(id: int):
 
 # Obtengo una lista de televisores con paginacion.
 @televisor_controller.route("/cliente/<int:id>/<int:page>")
+@admin_required()
+@jwt_required(fresh=True)
 def getTelevisoresByClienteIdWithPagination(id: int, page: int):
     try:
         result = TelevisorService.get_televisores_by_cliente_id_with_pagination(
