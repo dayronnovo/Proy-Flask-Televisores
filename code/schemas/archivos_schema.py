@@ -3,7 +3,8 @@ from werkzeug.datastructures import FileStorage
 import os
 
 TEXT = ('.txt',)
-DOCUMENTS = tuple('.rtf .odf .ods .gnumeric .abw .doc .docx .xls .xlsx'.split())
+DOCUMENTS = tuple(
+    '.rtf .odf .ods .gnumeric .abw .doc .docx .xls .xlsx'.split())
 IMAGES = tuple('.jpg .jpe .jpeg .png .gif .svg .bmp'.split())
 AUDIO = tuple('.wav .mp3 .aac .ogg .oga .flac'.split())
 VIDEO = tuple('.mp4 .mov .wmv .avi .avchd .flv .f4v .swf .mkv'.split())
@@ -21,7 +22,7 @@ class FileStorageField(fields.Field):
     def _deserialize(self, value: FileStorage, attr, data, **kwargs):
         extension = os.path.splitext(value.filename)[1].lower()
         if extension not in IMAGES + VIDEO:
-            self.fail("invalid")
+            self.fail("Invalid Format")
         return value
 
 

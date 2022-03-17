@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from excepciones_personalizadas.excepciones import NotFound
 from models.usuario import Usuario
 from services.usuario_service import UsuarioService
 from schemas.general_schemas import usuario_schema, usuario_schema_without_roles, role_schema, role_schema_without_usuarios
@@ -13,33 +14,32 @@ login_controller = Blueprint('login_controller', __name__)
 @auth.login_required
 def login():
     try:
-        # Tengo que validar esto con Marshmallow
-        # email = request.get_json()['email']
-        # password = request.get_json()['password']
 
-        usuario_dict = usuario_schema_without_roles.load(
-            request.get_json(), partial=("id",))
-        print(usuario_dict)
+        user_email = request.get_json().get('user_email')
+        password = request.get_json().get('password')
 
-        usuario: Usuario = UsuarioService.get_by_email(usuario_dict['email'])
-        if usuario:
+        if not (user_email and password):
+            # Bad Request
+            return {'Error': "user_email or password required"}, 400
 
-            if bcrypt.checkpw(usuario_dict['password'].encode('utf-8'), usuario.password.encode('utf-8')):
+        usuario: Usuario = UsuarioService.get_by_email(user_email)
 
-                roles_list = [role.name for role in usuario.roles]
+        if bcrypt.checkpw(password.encode('utf-8'), usuario.password.encode('utf-8')):
 
-                access_token = create_access_token(
-                    identity={'email': usuario.email, 'authorities': roles_list}, fresh=True)
-                refresh_token = create_refresh_token(
-                    identity={'email': usuario.email, 'authorities': roles_list})
+            roles_list = [role.name for role in usuario.roles]
 
-                return {'access_token': access_token, 'refresh_token': refresh_token}
+            access_token = create_access_token(
+                identity={'email': usuario.email, 'authorities': roles_list}, fresh=True)
+            refresh_token = create_refresh_token(
+                identity={'email': usuario.email, 'authorities': roles_list})
 
-            else:
-                return {'message': 'Invalid Credentials.'}, 401
+            return {'access_token': access_token, 'refresh_token': refresh_token}
 
         else:
-            return {'Error': "Usuario no encontrado."}, 404
+            return {'message': 'Invalid Credentials.'}, 401
+
+    except NotFound as error:
+        return {'message': 'Invalid Credentials.'}, 401
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
 
@@ -68,12 +68,12 @@ def register():
     try:
 
         usuario: Usuario = usuario_schema_without_roles.load(
-            request.get_json())
+            request.get_json(), partial=("id",))
         usuario['password'] = bcrypt.hashpw(
             usuario['password'].encode('utf-8'), bcrypt.gensalt())
         UsuarioService.create(usuario)
 
-        return {'message': 'ok'}
+        return {'message': 'Usuario creado con exito.'}
 
     except Exception as error:
         return {'Error': f"{error}"}, 500  # Internal Error
